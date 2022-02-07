@@ -10,5 +10,10 @@ type Maze node
 
 
 build : Int -> Int -> Graph node Bool -> Generator (Maze node)
-build start end graph =
-    Debug.todo "build"
+build =
+    buildHelp []
+
+
+buildHelp : List Int -> Int -> Int -> Graph node Bool -> Generator (Maze node)
+buildHelp stack start end graph =
+    Debug.todo "buildHelp"
