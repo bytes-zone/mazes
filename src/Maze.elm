@@ -10,10 +10,15 @@ type Maze node
 
 
 build : Int -> Int -> Graph node Bool -> Generator (Maze node)
-build =
-    buildHelp []
+build start end graph =
+    buildHelp [ start ] end graph
 
 
-buildHelp : List Int -> Int -> Int -> Graph node Bool -> Generator (Maze node)
-buildHelp stack start end graph =
-    Debug.todo "buildHelp"
+buildHelp : List Int -> Int -> Graph node Bool -> Generator (Maze node)
+buildHelp stack end graph =
+    case stack of
+        [] ->
+            Debug.todo "we failed to generate a maze, but it's not reflected in the types"
+
+        here :: _ ->
+            Debug.todo "buildHelp"
