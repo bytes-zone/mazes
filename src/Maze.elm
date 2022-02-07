@@ -1,19 +1,14 @@
-module Maze exposing (Graph, Maze, build)
+module Maze exposing (Maze, build)
 
+import Graph exposing (Graph)
 import Random exposing (Generator)
+import Set exposing (Set)
 
 
-type alias Graph =
-    { start : Int
-    , end : Int
-    , edges : List ( Int, Int )
-    }
+type Maze node
+    = Built (Graph node Bool)
 
 
-type Maze
-    = Built Graph
-
-
-build : Graph -> Generator Maze
+build : Graph node Bool -> Generator (Maze node)
 build graph =
     Debug.todo "build"
