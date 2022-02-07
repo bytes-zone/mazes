@@ -9,20 +9,20 @@ type Maze node
     = Built (Graph node Bool)
 
 
-build : Int -> Int -> Graph node Bool -> Generator (Maze node)
-build start end graph =
-    buildHelp [ start ] end graph
+build : Int -> Int -> Graph node Bool -> Random.Seed -> Maze node
+build start end graph seed =
+    buildHelp [ start ] end graph seed
 
 
-buildHelp : List Int -> Int -> Graph node Bool -> Generator (Maze node)
-buildHelp stack end graph =
+buildHelp : List Int -> Int -> Graph node Bool -> Random.Seed -> Maze node
+buildHelp stack end graph seed =
     case stack of
         [] ->
             Built graph
 
         whereWeAre :: whereWeWere ->
             if whereWeAre == end then
-                buildHelp whereWeWere end graph
+                buildHelp whereWeWere end graph seed
 
             else
                 let
@@ -35,15 +35,15 @@ buildHelp stack end graph =
                 in
                 case possibilities of
                     [] ->
-                        buildHelp whereWeWere end graph
+                        buildHelp whereWeWere end graph seed
 
                     first :: rest ->
-                        -- TODO: make this stack-safe if it turns out to be a problem
-                        Random.uniform first rest
-                            |> Random.andThen
-                                (\next ->
-                                    buildHelp
-                                        (next :: stack)
-                                        end
-                                        (Graph.setEdge whereWeAre next False graph)
-                                )
+                        let
+                            ( whereWeAreGoing, nextSeed ) =
+                                Random.step (Random.uniform first rest) seed
+                        in
+                        buildHelp
+                            (whereWeAreGoing :: stack)
+                            end
+                            (Graph.setEdge whereWeAre whereWeAreGoing False graph)
+                            nextSeed
