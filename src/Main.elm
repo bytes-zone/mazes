@@ -3,6 +3,7 @@ module Main exposing (..)
 import Graph exposing (Graph)
 import Html exposing (Html)
 import Maze
+import Random
 
 
 {-| IDs are laid out like:
@@ -37,6 +38,14 @@ threeByThree =
         |> Graph.setEdge 8 9 True
 
 
+seed : Random.Seed
+seed =
+    Random.initialSeed 0
+
+
 main : Html msg
 main =
-    Html.text (Debug.toString threeByThree)
+    Html.main_ []
+        [ Html.p [] [ Html.text (Debug.toString threeByThree) ]
+        , Html.p [] [ Html.text (Debug.toString (Maze.build 1 9 threeByThree seed)) ]
+        ]
