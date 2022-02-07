@@ -9,6 +9,6 @@ type Maze node
     = Built (Graph node Bool)
 
 
-build : Graph node Bool -> Generator (Maze node)
-build graph =
+build : Int -> Int -> Graph node Bool -> Generator (Maze node)
+build start end graph =
     Debug.todo "build"
