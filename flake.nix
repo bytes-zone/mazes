@@ -13,6 +13,7 @@
             pkgs.elmPackages.elm
             pkgs.elmPackages.elm-format
             pkgs.elmPackages.elm-live
+            pkgs.elmPackages.elm-test
           ];
         };
       });
