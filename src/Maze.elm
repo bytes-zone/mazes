@@ -18,7 +18,7 @@ buildHelp : List Int -> Int -> Graph node Bool -> Generator (Maze node)
 buildHelp stack end graph =
     case stack of
         [] ->
-            Debug.todo "we failed to generate a maze, but it's not reflected in the types"
+            Built graph
 
         whereWeAre :: whereWeWere ->
             if whereWeAre == end then
