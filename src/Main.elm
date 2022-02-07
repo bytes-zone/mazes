@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (Html)
+import Maze
 
 
 main : Html msg
