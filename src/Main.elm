@@ -14,7 +14,7 @@ tenByTen =
     Maze.squares
         { row = -1, column = -1 }
         { wall = True }
-        { width = 3, height = 3 }
+        { width = 10, height = 10 }
 
 
 main : RootHtml.Html msg
@@ -24,9 +24,9 @@ main =
         , Html.h2 [] [ Html.text "Ungenerated" ]
         , viewWithDebug tenByTen
         , Html.h2 [] [ Html.text "Generated" ]
-        , viewWithDebug (Maze.generate 0 8 tenByTen (Random.initialSeed 0))
-        , viewWithDebug (Maze.generate 0 8 tenByTen (Random.initialSeed 1))
-        , viewWithDebug (Maze.generate 0 8 tenByTen (Random.initialSeed 2))
+        , viewWithDebug (Maze.generate 0 99 tenByTen (Random.initialSeed 0))
+        , viewWithDebug (Maze.generate 0 99 tenByTen (Random.initialSeed 1))
+        , viewWithDebug (Maze.generate 0 99 tenByTen (Random.initialSeed 2))
         ]
         |> Html.toUnstyled
 
