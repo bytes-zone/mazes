@@ -22,8 +22,8 @@ main =
         , Html.h2 [] [ Html.text "Ungenerated" ]
         , Maze.view tenByTen
         , Html.h2 [] [ Html.text "Generated" ]
-        , Maze.view (Maze.generate 1 9 tenByTen (Random.initialSeed 0))
-        , Maze.view (Maze.generate 1 9 tenByTen (Random.initialSeed 1))
-        , Maze.view (Maze.generate 1 9 tenByTen (Random.initialSeed 2))
+        , Maze.view (Maze.generate 0 99 tenByTen (Random.initialSeed 0))
+        , Maze.view (Maze.generate 0 99 tenByTen (Random.initialSeed 1))
+        , Maze.view (Maze.generate 0 99 tenByTen (Random.initialSeed 2))
         ]
         |> Html.toUnstyled
