@@ -1,4 +1,4 @@
-module Graph exposing (Graph, empty, neighbors, node, setEdge, setNode)
+module Graph exposing (Graph, empty, neighbors, node, setEdge, setNode, updateEdge)
 
 import Dict exposing (Dict)
 
@@ -23,27 +23,36 @@ setNode id data (Graph guts) =
 
 
 setEdge : Int -> Int -> edge -> Graph node edge -> Graph node edge
-setEdge a b data (Graph guts) =
+setEdge a b data graph =
+    updateEdge a b (\_ -> Just data) graph
+
+
+updateEdge : Int -> Int -> (Maybe edge -> Maybe edge) -> Graph node edge -> Graph node edge
+updateEdge a b updater (Graph guts) =
     Graph
         { guts
             | edges =
                 guts.edges
-                    |> setEdgeHelp a b data
-                    |> setEdgeHelp b a data
+                    |> updateEdgeHelp a b updater
+                    |> updateEdgeHelp b a updater
         }
 
 
-setEdgeHelp : Int -> Int -> edge -> Dict Int (Dict Int edge) -> Dict Int (Dict Int edge)
-setEdgeHelp a b data =
+updateEdgeHelp : Int -> Int -> (Maybe edge -> Maybe edge) -> Dict Int (Dict Int edge) -> Dict Int (Dict Int edge)
+updateEdgeHelp a b updater =
     Dict.update a
         (\maybeInner ->
-            Just <|
-                case maybeInner of
-                    Nothing ->
-                        Dict.singleton b data
+            case maybeInner of
+                Nothing ->
+                    case updater Nothing of
+                        Just data ->
+                            Just (Dict.singleton b data)
 
-                    Just inner ->
-                        Dict.insert b data inner
+                        Nothing ->
+                            Nothing
+
+                Just inner ->
+                    Just (Dict.update b updater inner)
         )
 
 
