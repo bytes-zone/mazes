@@ -30,15 +30,15 @@ squares makeNode initEdge bounds =
         |> List.foldl
             (\( id, ( col, row ) ) graph ->
                 graph
-                    |> Graph.setNode id (makeNode ( col, row ))
+                    |> Graph.insertNode id (makeNode ( col, row ))
                     |> (if row + 1 <= height then
-                            Graph.setEdge id (id + width + 1) initEdge
+                            Graph.insertEdge id (id + width + 1) initEdge
 
                         else
                             identity
                        )
                     |> (if col + 1 <= width then
-                            Graph.setEdge id (id + 1) initEdge
+                            Graph.insertEdge id (id + 1) initEdge
 
                         else
                             identity

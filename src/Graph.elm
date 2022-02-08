@@ -1,4 +1,4 @@
-module Graph exposing (Graph, empty, neighbors, node, setEdge, setNode, updateEdge)
+module Graph exposing (Graph, empty, insertEdge, insertNode, neighbors, node, updateEdge)
 
 import Dict exposing (Dict)
 
@@ -17,13 +17,13 @@ empty =
     Graph { nodes = Dict.empty, edges = Dict.empty }
 
 
-setNode : Int -> node -> Graph node edge -> Graph node edge
-setNode id data (Graph guts) =
+insertNode : Int -> node -> Graph node edge -> Graph node edge
+insertNode id data (Graph guts) =
     Graph { guts | nodes = Dict.insert id data guts.nodes }
 
 
-setEdge : Int -> Int -> edge -> Graph node edge -> Graph node edge
-setEdge a b data graph =
+insertEdge : Int -> Int -> edge -> Graph node edge -> Graph node edge
+insertEdge a b data graph =
     updateEdge a b (\_ -> Just data) graph
 
 
