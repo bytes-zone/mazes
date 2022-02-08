@@ -3,6 +3,7 @@ module Maze exposing (Maze, custom, generate, squares)
 import Dict
 import Graph exposing (Graph)
 import Random exposing (Generator)
+import Set exposing (Set)
 
 
 squares : (( Int, Int ) -> node) -> { edge | present : Bool } -> { width : Int, height : Int } -> Maze node { edge | present : Bool }
@@ -58,21 +59,26 @@ generate : Int -> Int -> Maze node { edge | present : Bool } -> Random.Seed -> M
 generate start end maze seed =
     case maze of
         Maze custom_ ->
-            Maze (generateHelp [ start ] end custom_ seed)
+            Maze (generateHelp [ start ] Set.empty end custom_ seed)
 
         Squares squares_ ->
-            Squares (generateHelp [ start ] end squares_ seed)
+            Squares (generateHelp [ start ] Set.empty end squares_ seed)
 
 
-generateHelp : List Int -> Int -> Graph node { edge | present : Bool } -> Random.Seed -> Graph node { edge | present : Bool }
-generateHelp stack end graph seed =
+generateHelp : List Int -> Set Int -> Int -> Graph node { edge | present : Bool } -> Random.Seed -> Graph node { edge | present : Bool }
+generateHelp stack visited end graph seed =
     case stack of
         [] ->
             graph
 
         whereWeAre :: whereWeWere ->
             if whereWeAre == end then
-                generateHelp whereWeWere end graph seed
+                generateHelp
+                    whereWeWere
+                    (Set.insert end visited)
+                    end
+                    graph
+                    seed
 
             else
                 let
@@ -80,12 +86,15 @@ generateHelp stack end graph seed =
                         Graph.neighbors whereWeAre graph
                             |> Maybe.withDefault Dict.empty
                             |> Dict.toList
-                            |> List.filter (Tuple.second >> .present)
+                            |> List.filter (\( id, _ ) -> not (Set.member id visited))
                             |> List.map Tuple.first
                 in
                 case possibilities of
                     [] ->
-                        generateHelp whereWeWere end graph seed
+                        -- if there are no possibilities, we need to pop from
+                        -- the stack until we get to a node with possibilities
+                        -- or return to the start
+                        generateHelp whereWeWere visited end graph seed
 
                     first :: rest ->
                         let
@@ -94,6 +103,7 @@ generateHelp stack end graph seed =
                         in
                         generateHelp
                             (whereWeAreGoing :: stack)
+                            (Set.insert whereWeAreGoing visited)
                             end
                             (Graph.updateEdge
                                 whereWeAre
