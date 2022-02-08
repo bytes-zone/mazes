@@ -45,18 +45,18 @@ squares makeNode initEdge bounds =
                        )
             )
             Graph.empty
-        |> Squares
+        |> Squares bounds
 
 
 type Maze node edge
-    = Squares (Graph node edge)
+    = Squares { width : Int, height : Int } (Graph node edge)
 
 
 generate : Int -> Int -> Maze node { edge | wall : Bool } -> Random.Seed -> Maze node { edge | wall : Bool }
 generate start end maze seed =
     case maze of
-        Squares squares_ ->
-            Squares (generateHelp [ start ] Set.empty end squares_ seed)
+        Squares bounds squares_ ->
+            Squares bounds (generateHelp [ start ] Set.empty end squares_ seed)
 
 
 generateHelp : List Int -> Set Int -> Int -> Graph node { edge | wall : Bool } -> Random.Seed -> Graph node { edge | wall : Bool }
@@ -109,19 +109,35 @@ generateHelp stack visited end graph seed =
 
 
 view : Maze { node | coords : ( Int, Int ) } { edge | wall : Bool } -> Html msg
-view _ =
-    Svg.svg
-        [ Attrs.width "250"
-        , Attrs.height "250"
-        , Attrs.viewBox "0 0 1000 1000"
-        , Attrs.style "border: 1px solid black"
-        ]
-        [ Svg.rect
-            [ Attrs.x "0"
-            , Attrs.y "0"
-            , Attrs.width "100"
-            , Attrs.height "100"
-            , Attrs.fill "black"
+view (Squares bounds graph) =
+    let
+        squareSize =
+            25
+    in
+    Graph.nodes graph
+        |> Dict.toList
+        |> List.map
+            (\( id, node ) ->
+                Svg.rect
+                    [ Attrs.fill "#EEE"
+
+                    -- attrs above here should eventually come in from a parameter
+                    , Attrs.x (String.fromInt (squareSize * Tuple.first node.coords))
+                    , Attrs.y (String.fromInt (squareSize * Tuple.second node.coords))
+                    , Attrs.width (String.fromInt squareSize)
+                    , Attrs.height (String.fromInt squareSize)
+                    ]
+                    []
+            )
+        |> Svg.svg
+            [ Attrs.width "250"
+            , Attrs.height "250"
+            , Attrs.style "border: 1px solid black"
+
+            -- things above this should eventually end up in a passed-in attribute.
+            , Attrs.viewBox <|
+                "0 0 "
+                    ++ String.fromInt (bounds.width * squareSize)
+                    ++ " "
+                    ++ String.fromInt (bounds.height * squareSize)
             ]
-            []
-        ]

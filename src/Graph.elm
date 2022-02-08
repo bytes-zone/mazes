@@ -1,4 +1,4 @@
-module Graph exposing (Graph, empty, insertEdge, insertNode, neighbors, node, updateEdge)
+module Graph exposing (Graph, empty, insertEdge, insertNode, neighbors, node, nodes, updateEdge)
 
 import Dict exposing (Dict)
 
@@ -57,8 +57,13 @@ updateEdgeHelp a b updater =
 
 
 node : Int -> Graph node edge -> Maybe node
-node id (Graph { nodes }) =
-    Dict.get id nodes
+node id (Graph guts) =
+    Dict.get id guts.nodes
+
+
+nodes : Graph node edge -> Dict Int node
+nodes (Graph guts) =
+    guts.nodes
 
 
 neighbors : Int -> Graph node edge -> Maybe (Dict Int edge)
