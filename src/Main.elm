@@ -5,9 +5,9 @@ import Maze exposing (Maze)
 import Random
 
 
-threeByThree : Maze ( Int, Int ) { present : Bool }
+threeByThree : Maze ( Int, Int ) { wall : Bool }
 threeByThree =
-    Maze.squares identity { present = True } { width = 3, height = 3 }
+    Maze.squares identity { wall = True } { width = 3, height = 3 }
 
 
 seed : Random.Seed

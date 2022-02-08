@@ -6,7 +6,7 @@ import Random exposing (Generator)
 import Set exposing (Set)
 
 
-squares : (( Int, Int ) -> node) -> { edge | present : Bool } -> { width : Int, height : Int } -> Maze node { edge | present : Bool }
+squares : (( Int, Int ) -> node) -> { edge | wall : Bool } -> { width : Int, height : Int } -> Maze node { edge | wall : Bool }
 squares makeNode initEdge bounds =
     let
         width =
@@ -45,7 +45,7 @@ squares makeNode initEdge bounds =
         |> Squares
 
 
-custom : Graph node { edge | present : Bool } -> Maze node { edge | present : Bool }
+custom : Graph node { edge | wall : Bool } -> Maze node { edge | wall : Bool }
 custom =
     Maze
 
@@ -55,7 +55,7 @@ type Maze node edge
     | Squares (Graph node edge)
 
 
-generate : Int -> Int -> Maze node { edge | present : Bool } -> Random.Seed -> Maze node { edge | present : Bool }
+generate : Int -> Int -> Maze node { edge | wall : Bool } -> Random.Seed -> Maze node { edge | wall : Bool }
 generate start end maze seed =
     case maze of
         Maze custom_ ->
@@ -65,7 +65,7 @@ generate start end maze seed =
             Squares (generateHelp [ start ] Set.empty end squares_ seed)
 
 
-generateHelp : List Int -> Set Int -> Int -> Graph node { edge | present : Bool } -> Random.Seed -> Graph node { edge | present : Bool }
+generateHelp : List Int -> Set Int -> Int -> Graph node { edge | wall : Bool } -> Random.Seed -> Graph node { edge | wall : Bool }
 generateHelp stack visited end graph seed =
     case stack of
         [] ->
@@ -108,7 +108,7 @@ generateHelp stack visited end graph seed =
                             (Graph.updateEdge
                                 whereWeAre
                                 whereWeAreGoing
-                                (Maybe.map (\edge -> { edge | present = False }))
+                                (Maybe.map (\edge -> { edge | wall = False }))
                                 graph
                             )
                             nextSeed
