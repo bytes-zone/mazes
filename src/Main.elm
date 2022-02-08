@@ -22,24 +22,10 @@ main =
     Html.main_ []
         [ Html.h1 [] [ Html.text "Mazes!" ]
         , Html.h2 [] [ Html.text "Ungenerated" ]
-        , viewWithDebug tenByTen
+        , Maze.view tenByTen
         , Html.h2 [] [ Html.text "Generated" ]
-        , viewWithDebug (Maze.generate 0 99 tenByTen (Random.initialSeed 0))
-        , viewWithDebug (Maze.generate 0 99 tenByTen (Random.initialSeed 1))
-        , viewWithDebug (Maze.generate 0 99 tenByTen (Random.initialSeed 2))
+        , Maze.view (Maze.generate 0 99 tenByTen (Random.initialSeed 0))
+        , Maze.view (Maze.generate 0 99 tenByTen (Random.initialSeed 1))
+        , Maze.view (Maze.generate 0 99 tenByTen (Random.initialSeed 2))
         ]
         |> Html.toUnstyled
-
-
-viewWithDebug : Maze { row : Int, column : Int } { wall : Bool } -> Html msg
-viewWithDebug maze =
-    Html.section
-        [ css
-            [ Css.displayFlex
-            , Css.justifyContent Css.spaceAround
-            , Css.width (Css.px 800)
-            ]
-        ]
-        [ Maze.view maze
-        , Maze.debugView maze
-        ]
