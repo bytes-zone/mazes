@@ -112,7 +112,7 @@ view : Maze { node | coords : ( Int, Int ) } { edge | wall : Bool } -> Html msg
 view (Squares bounds graph) =
     let
         squareSize =
-            25
+            50
     in
     Graph.nodes graph
         |> Dict.toList
