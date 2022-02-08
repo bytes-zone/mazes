@@ -60,7 +60,7 @@ generate : Int -> Int -> Maze node { edge | wall : Bool } -> Random.Seed -> Maze
 generate start end maze seed =
     case maze of
         Squares bounds squares_ ->
-            Squares bounds (generateHelp [ start ] Set.empty end squares_ seed)
+            Squares bounds (generateHelp [ start ] (Set.singleton start) end squares_ seed)
 
 
 generateHelp : List Int -> Set Int -> Int -> Graph node { edge | wall : Bool } -> Random.Seed -> Graph node { edge | wall : Bool }
