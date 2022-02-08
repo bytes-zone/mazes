@@ -1,4 +1,4 @@
-module Maze exposing (Maze, generate, squares, view)
+module Maze exposing (Maze, debugView, generate, squares, view)
 
 import Dict
 import Graph exposing (Graph)
@@ -9,8 +9,12 @@ import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Attrs
 
 
-squares : (( Int, Int ) -> node) -> { edge | wall : Bool } -> { width : Int, height : Int } -> Maze node { edge | wall : Bool }
-squares makeNode initEdge bounds =
+squares :
+    { node | row : Int, column : Int }
+    -> { edge | wall : Bool }
+    -> { width : Int, height : Int }
+    -> Maze { node | row : Int, column : Int } { edge | wall : Bool }
+squares initNode initEdge bounds =
     let
         width =
             bounds.width - 1
@@ -23,21 +27,21 @@ squares makeNode initEdge bounds =
         |> List.concatMap
             (\row ->
                 List.range 0 width
-                    |> List.map (\col -> ( col, row ))
+                    |> List.map (\column -> { row = row, column = column })
             )
         |> List.indexedMap Tuple.pair
         -- create a graph out of 'em!
         |> List.foldl
-            (\( id, ( col, row ) ) graph ->
+            (\( id, { row, column } ) graph ->
                 graph
-                    |> Graph.insertNode id (makeNode ( col, row ))
+                    |> Graph.insertNode id { initNode | row = row, column = column }
                     |> (if row + 1 <= height then
                             Graph.insertEdge id (id + width + 1) initEdge
 
                         else
                             identity
                        )
-                    |> (if col + 1 <= width then
+                    |> (if column + 1 <= width then
                             Graph.insertEdge id (id + 1) initEdge
 
                         else
@@ -108,7 +112,7 @@ generateHelp stack visited end graph seed =
                             nextSeed
 
 
-view : Maze { node | coords : ( Int, Int ) } { edge | wall : Bool } -> Html msg
+view : Maze { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
 view (Squares bounds graph) =
     let
         squareSize =
@@ -116,18 +120,66 @@ view (Squares bounds graph) =
     in
     Graph.nodes graph
         |> Dict.toList
-        |> List.map
+        |> List.concatMap
             (\( id, node ) ->
-                Svg.rect
-                    [ Attrs.fill "#EEE"
+                let
+                    box =
+                        Svg.text_
+                            [ Attrs.fill "black"
 
-                    -- attrs above here should eventually come in from a parameter
-                    , Attrs.x (String.fromInt (squareSize * Tuple.first node.coords))
-                    , Attrs.y (String.fromInt (squareSize * Tuple.second node.coords))
-                    , Attrs.width (String.fromInt squareSize)
-                    , Attrs.height (String.fromInt squareSize)
-                    ]
-                    []
+                            -- attrs above here should eventually come in from a parameter
+                            , Attrs.x (String.fromInt (node.column * squareSize + squareSize // 2))
+                            , Attrs.y (String.fromInt (node.row * squareSize + squareSize // 2))
+                            , Attrs.width (String.fromInt squareSize)
+                            , Attrs.height (String.fromInt squareSize)
+                            , Attrs.class ("id-" ++ String.fromInt id)
+                            ]
+                            [ Svg.text (String.fromInt id) ]
+
+                    walls =
+                        Graph.edgesFrom id graph
+                            |> Maybe.map Dict.toList
+                            |> Maybe.withDefault []
+                            |> List.filter (Tuple.second >> .wall)
+                            |> List.filterMap (\( toId, edge ) -> Maybe.map (Tuple.pair edge) (Graph.node toId graph))
+                            |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
+                            |> List.map
+                                (\( edge, other ) ->
+                                    Svg.line
+                                        (Attrs.stroke "black"
+                                            -- attrs above here should eventually come in from a parameter
+                                            :: Attrs.class ("edge-" ++ String.fromInt id)
+                                            :: (if other.column > node.column then
+                                                    -- line goes to the right of the node
+                                                    [ Attrs.x1 (String.fromInt (node.column * squareSize + squareSize))
+                                                    , Attrs.y1 (String.fromInt (node.row * squareSize))
+                                                    , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
+                                                    , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
+                                                    , Attrs.class "bottom"
+                                                    , Attrs.stroke "blue"
+                                                    ]
+
+                                                else if other.row > node.row then
+                                                    -- line goes below node
+                                                    [ Attrs.x1 (String.fromInt (node.column * squareSize))
+                                                    , Attrs.y1 (String.fromInt (node.row * squareSize + squareSize))
+                                                    , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
+                                                    , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
+                                                    , Attrs.class "bottom"
+                                                    , Attrs.stroke "red"
+                                                    ]
+
+                                                else
+                                                    -- invalid but we should have
+                                                    -- already removed any nodes
+                                                    -- with any other conditions
+                                                    Debug.todo "another condition"
+                                               )
+                                        )
+                                        []
+                                )
+                in
+                box :: walls
             )
         |> Svg.svg
             [ Attrs.width "250"
@@ -141,3 +193,20 @@ view (Squares bounds graph) =
                     ++ " "
                     ++ String.fromInt (bounds.height * squareSize)
             ]
+
+
+debugView : Maze { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
+debugView (Squares bounds graph) =
+    Graph.nodes graph
+        |> Dict.toList
+        |> List.concatMap
+            (\( id, node ) ->
+                Graph.neighbors id graph
+                    |> Maybe.map Dict.toList
+                    |> Maybe.withDefault []
+                    |> List.filterMap (\( otherId, edge ) -> Maybe.map (Tuple.pair ( otherId, edge )) (Graph.node otherId graph))
+                    -- |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
+                    |> List.map (\stuff -> Html.dd [] [ Html.text (Debug.toString stuff) ])
+                    |> (::) (Html.dt [] [ Html.text (String.fromInt id ++ " (" ++ Debug.toString node ++ ")") ])
+            )
+        |> Html.dl []
