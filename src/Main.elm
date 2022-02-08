@@ -13,7 +13,7 @@ import Random
 | 7 | 8 | 9 |
 
 -}
-threeByThree : Graph ( Int, Int ) Bool
+threeByThree : Graph ( Int, Int ) { present : Bool }
 threeByThree =
     Graph.empty
         |> Graph.setNode 1 ( 0, 0 )
@@ -25,17 +25,17 @@ threeByThree =
         |> Graph.setNode 7 ( 2, 0 )
         |> Graph.setNode 8 ( 2, 1 )
         |> Graph.setNode 9 ( 2, 2 )
-        |> Graph.setEdge 1 2 True
-        |> Graph.setEdge 1 4 True
-        |> Graph.setEdge 2 3 True
-        |> Graph.setEdge 2 5 True
-        |> Graph.setEdge 3 6 True
-        |> Graph.setEdge 4 7 True
-        |> Graph.setEdge 4 5 True
-        |> Graph.setEdge 5 6 True
-        |> Graph.setEdge 5 8 True
-        |> Graph.setEdge 7 8 True
-        |> Graph.setEdge 8 9 True
+        |> Graph.setEdge 1 2 { present = True }
+        |> Graph.setEdge 1 4 { present = True }
+        |> Graph.setEdge 2 3 { present = True }
+        |> Graph.setEdge 2 5 { present = True }
+        |> Graph.setEdge 3 6 { present = True }
+        |> Graph.setEdge 4 7 { present = True }
+        |> Graph.setEdge 4 5 { present = True }
+        |> Graph.setEdge 5 6 { present = True }
+        |> Graph.setEdge 5 8 { present = True }
+        |> Graph.setEdge 7 8 { present = True }
+        |> Graph.setEdge 8 9 { present = True }
 
 
 seed : Random.Seed
@@ -47,5 +47,5 @@ main : Html msg
 main =
     Html.main_ []
         [ Html.p [] [ Html.text (Debug.toString threeByThree) ]
-        , Html.p [] [ Html.text (Debug.toString (Maze.build 1 9 threeByThree seed)) ]
+        , Html.p [] [ Html.text (Debug.toString (Maze.generate 1 9 (Maze.custom threeByThree) seed)) ]
         ]
