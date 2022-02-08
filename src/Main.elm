@@ -1,13 +1,18 @@
 module Main exposing (..)
 
-import Html exposing (Html)
+import Html as RootHtml
+import Html.Styled as Html exposing (Html)
 import Maze exposing (Maze)
 import Random
+import Svg.Styled as Svg
 
 
-threeByThree : Maze ( Int, Int ) { wall : Bool }
+threeByThree : Maze { coords : ( Int, Int ) } { wall : Bool }
 threeByThree =
-    Maze.squares identity { wall = True } { width = 3, height = 3 }
+    Maze.squares
+        (\coords -> { coords = coords })
+        { wall = True }
+        { width = 3, height = 3 }
 
 
 seed : Random.Seed
@@ -15,9 +20,13 @@ seed =
     Random.initialSeed 0
 
 
-main : Html msg
+main : RootHtml.Html msg
 main =
     Html.main_ []
-        [ Html.p [] [ Html.text (Debug.toString threeByThree) ]
-        , Html.p [] [ Html.text (Debug.toString (Maze.generate 1 9 threeByThree seed)) ]
+        [ Html.h1 [] [ Html.text "Mazes!" ]
+        , Html.h2 [] [ Html.text "Ungenerated" ]
+        , Maze.view threeByThree
+        , Html.h2 [] [ Html.text "Generated" ]
+        , Maze.view (Maze.generate 1 9 threeByThree seed)
         ]
+        |> Html.toUnstyled

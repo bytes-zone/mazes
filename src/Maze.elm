@@ -1,9 +1,12 @@
-module Maze exposing (Maze, generate, squares)
+module Maze exposing (Maze, generate, squares, view)
 
 import Dict
 import Graph exposing (Graph)
+import Html.Styled as Html exposing (Html)
 import Random exposing (Generator)
 import Set exposing (Set)
+import Svg.Styled as Svg exposing (Svg)
+import Svg.Styled.Attributes as Attrs
 
 
 squares : (( Int, Int ) -> node) -> { edge | wall : Bool } -> { width : Int, height : Int } -> Maze node { edge | wall : Bool }
@@ -103,3 +106,22 @@ generateHelp stack visited end graph seed =
                                 graph
                             )
                             nextSeed
+
+
+view : Maze { node | coords : ( Int, Int ) } { edge | wall : Bool } -> Html msg
+view _ =
+    Svg.svg
+        [ Attrs.width "250"
+        , Attrs.height "250"
+        , Attrs.viewBox "0 0 1000 1000"
+        , Attrs.style "border: 1px solid black"
+        ]
+        [ Svg.rect
+            [ Attrs.x "0"
+            , Attrs.y "0"
+            , Attrs.width "100"
+            , Attrs.height "100"
+            , Attrs.fill "black"
+            ]
+            []
+        ]
