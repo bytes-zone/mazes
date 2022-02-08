@@ -1,4 +1,4 @@
-module Maze exposing (Maze, custom, generate, squares)
+module Maze exposing (Maze, generate, squares)
 
 import Dict
 import Graph exposing (Graph)
@@ -45,22 +45,13 @@ squares makeNode initEdge bounds =
         |> Squares
 
 
-custom : Graph node { edge | wall : Bool } -> Maze node { edge | wall : Bool }
-custom =
-    Maze
-
-
 type Maze node edge
-    = Maze (Graph node edge)
-    | Squares (Graph node edge)
+    = Squares (Graph node edge)
 
 
 generate : Int -> Int -> Maze node { edge | wall : Bool } -> Random.Seed -> Maze node { edge | wall : Bool }
 generate start end maze seed =
     case maze of
-        Maze custom_ ->
-            Maze (generateHelp [ start ] Set.empty end custom_ seed)
-
         Squares squares_ ->
             Squares (generateHelp [ start ] Set.empty end squares_ seed)
 
