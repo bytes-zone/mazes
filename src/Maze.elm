@@ -1,4 +1,4 @@
-module Maze exposing (Maze, debugView, generate, squares, view)
+module Maze exposing (Maze, debugView, generate, hexes, squares, view)
 
 import Dict
 import Graph exposing (Graph)
@@ -50,6 +50,30 @@ squares initNode initEdge bounds =
             )
             Graph.empty
         |> Squares bounds
+
+
+hexes :
+    { node | row : Int, column : Int }
+    -> { edge | wall : Bool }
+    -> { width : Int, height : Int }
+    -> Maze { node | row : Int, column : Int } { edge | wall : Bool }
+hexes initNode initEdge bounds =
+    List.range 0 (bounds.width * bounds.height - 1)
+        |> List.foldl
+            (\id graph ->
+                let
+                    row =
+                        id // bounds.width
+
+                    column =
+                        modBy bounds.width id
+                in
+                graph
+                    |> Graph.insertNode id { initNode | row = row, column = column }
+            )
+            Graph.empty
+        |> Debug.log "ids"
+        |> Hexes bounds
 
 
 type Maze node edge
