@@ -54,6 +54,7 @@ squares initNode initEdge bounds =
 
 type Maze node edge
     = Squares { width : Int, height : Int } (Graph node edge)
+    | Hexes { width : Int, height : Int } (Graph node edge)
 
 
 generate : Int -> Int -> Maze node { edge | wall : Bool } -> Random.Seed -> Maze node { edge | wall : Bool }
@@ -61,6 +62,9 @@ generate start end maze seed =
     case maze of
         Squares bounds squares_ ->
             Squares bounds (generateHelp [ start ] (Set.singleton start) end squares_ seed)
+
+        Hexes bounds hexes_ ->
+            Hexes bounds (generateHelp [ start ] (Set.singleton start) end hexes_ seed)
 
 
 generateHelp : List Int -> Set Int -> Int -> Graph node { edge | wall : Bool } -> Random.Seed -> Graph node { edge | wall : Bool }
@@ -113,99 +117,109 @@ generateHelp stack visited end graph seed =
 
 
 view : Maze { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
-view (Squares bounds graph) =
-    let
-        squareSize =
-            50
-    in
-    Graph.nodes graph
-        |> Dict.toList
-        |> List.concatMap
-            (\( id, node ) ->
-                let
-                    box =
-                        Svg.rect
-                            [ Attrs.fill "#FCFCFC"
+view maze =
+    case maze of
+        Squares bounds graph ->
+            let
+                squareSize =
+                    50
+            in
+            Graph.nodes graph
+                |> Dict.toList
+                |> List.concatMap
+                    (\( id, node ) ->
+                        let
+                            box =
+                                Svg.rect
+                                    [ Attrs.fill "#FCFCFC"
 
-                            -- attrs above here should eventually come in from a parameter
-                            , Attrs.x (String.fromInt (node.column * squareSize))
-                            , Attrs.y (String.fromInt (node.row * squareSize))
-                            , Attrs.width (String.fromInt squareSize)
-                            , Attrs.height (String.fromInt squareSize)
-                            , Attrs.class ("id-" ++ String.fromInt id)
-                            ]
-                            []
+                                    -- attrs above here should eventually come in from a parameter
+                                    , Attrs.x (String.fromInt (node.column * squareSize))
+                                    , Attrs.y (String.fromInt (node.row * squareSize))
+                                    , Attrs.width (String.fromInt squareSize)
+                                    , Attrs.height (String.fromInt squareSize)
+                                    , Attrs.class ("id-" ++ String.fromInt id)
+                                    ]
+                                    []
 
-                    walls =
-                        Graph.edgesFrom id graph
-                            |> Maybe.map Dict.toList
-                            |> Maybe.withDefault []
-                            |> List.filter (Tuple.second >> .wall)
-                            |> List.filterMap (\( toId, edge ) -> Maybe.map (Tuple.pair edge) (Graph.node toId graph))
-                            |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
-                            |> List.map
-                                (\( edge, other ) ->
-                                    Svg.line
-                                        (Attrs.stroke "black"
-                                            :: Attrs.strokeWidth "4"
-                                            -- attrs above here should eventually come in from a parameter
-                                            :: Attrs.class ("edge-" ++ String.fromInt id)
-                                            :: (if other.column > node.column then
-                                                    -- line goes to the right of the node
-                                                    [ Attrs.x1 (String.fromInt (node.column * squareSize + squareSize))
-                                                    , Attrs.y1 (String.fromInt (node.row * squareSize))
-                                                    , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
-                                                    , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
-                                                    , Attrs.class "bottom"
-                                                    ]
+                            walls =
+                                Graph.edgesFrom id graph
+                                    |> Maybe.map Dict.toList
+                                    |> Maybe.withDefault []
+                                    |> List.filter (Tuple.second >> .wall)
+                                    |> List.filterMap (\( toId, edge ) -> Maybe.map (Tuple.pair edge) (Graph.node toId graph))
+                                    |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
+                                    |> List.map
+                                        (\( edge, other ) ->
+                                            Svg.line
+                                                (Attrs.stroke "black"
+                                                    :: Attrs.strokeWidth "4"
+                                                    -- attrs above here should eventually come in from a parameter
+                                                    :: Attrs.class ("edge-" ++ String.fromInt id)
+                                                    :: (if other.column > node.column then
+                                                            -- line goes to the right of the node
+                                                            [ Attrs.x1 (String.fromInt (node.column * squareSize + squareSize))
+                                                            , Attrs.y1 (String.fromInt (node.row * squareSize))
+                                                            , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
+                                                            , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
+                                                            , Attrs.class "bottom"
+                                                            ]
 
-                                                else if other.row > node.row then
-                                                    -- line goes below node
-                                                    [ Attrs.x1 (String.fromInt (node.column * squareSize))
-                                                    , Attrs.y1 (String.fromInt (node.row * squareSize + squareSize))
-                                                    , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
-                                                    , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
-                                                    , Attrs.class "bottom"
-                                                    ]
+                                                        else if other.row > node.row then
+                                                            -- line goes below node
+                                                            [ Attrs.x1 (String.fromInt (node.column * squareSize))
+                                                            , Attrs.y1 (String.fromInt (node.row * squareSize + squareSize))
+                                                            , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
+                                                            , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
+                                                            , Attrs.class "bottom"
+                                                            ]
 
-                                                else
-                                                    -- invalid but we should have
-                                                    -- already removed any nodes
-                                                    -- with any other conditions
-                                                    Debug.todo "another condition"
-                                               )
+                                                        else
+                                                            -- invalid but we should have
+                                                            -- already removed any nodes
+                                                            -- with any other conditions
+                                                            Debug.todo "another condition"
+                                                       )
+                                                )
+                                                []
                                         )
-                                        []
-                                )
-                in
-                box :: walls
-            )
-        |> Svg.svg
-            [ Attrs.width "250"
-            , Attrs.height "250"
-            , Attrs.style "border: 1px solid black"
+                        in
+                        box :: walls
+                    )
+                |> Svg.svg
+                    [ Attrs.width "250"
+                    , Attrs.height "250"
+                    , Attrs.style "border: 1px solid black"
 
-            -- things above this should eventually end up in a passed-in attribute.
-            , Attrs.viewBox <|
-                "0 0 "
-                    ++ String.fromInt (bounds.width * squareSize)
-                    ++ " "
-                    ++ String.fromInt (bounds.height * squareSize)
-            ]
+                    -- things above this should eventually end up in a passed-in attribute.
+                    , Attrs.viewBox <|
+                        "0 0 "
+                            ++ String.fromInt (bounds.width * squareSize)
+                            ++ " "
+                            ++ String.fromInt (bounds.height * squareSize)
+                    ]
+
+        Hexes _ _ ->
+            Html.text "TODO"
 
 
 debugView : Maze { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
-debugView (Squares bounds graph) =
-    Graph.nodes graph
-        |> Dict.toList
-        |> List.concatMap
-            (\( id, node ) ->
-                Graph.neighbors id graph
-                    |> Maybe.map Dict.toList
-                    |> Maybe.withDefault []
-                    |> List.filterMap (\( otherId, edge ) -> Maybe.map (Tuple.pair ( otherId, edge )) (Graph.node otherId graph))
-                    -- |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
-                    |> List.map (\stuff -> Html.dd [] [ Html.text (Debug.toString stuff) ])
-                    |> (::) (Html.dt [] [ Html.text (String.fromInt id ++ " (" ++ Debug.toString node ++ ")") ])
-            )
-        |> Html.dl []
+debugView maze =
+    case maze of
+        Squares bounds graph ->
+            Graph.nodes graph
+                |> Dict.toList
+                |> List.concatMap
+                    (\( id, node ) ->
+                        Graph.neighbors id graph
+                            |> Maybe.map Dict.toList
+                            |> Maybe.withDefault []
+                            |> List.filterMap (\( otherId, edge ) -> Maybe.map (Tuple.pair ( otherId, edge )) (Graph.node otherId graph))
+                            -- |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
+                            |> List.map (\stuff -> Html.dd [] [ Html.text (Debug.toString stuff) ])
+                            |> (::) (Html.dt [] [ Html.text (String.fromInt id ++ " (" ++ Debug.toString node ++ ")") ])
+                    )
+                |> Html.dl []
+
+        Hexes _ _ ->
+            Html.text "TODO"
