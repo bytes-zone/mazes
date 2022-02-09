@@ -15,33 +15,25 @@ squares :
     -> { width : Int, height : Int }
     -> Maze { node | row : Int, column : Int } { edge | wall : Bool }
 squares initNode initEdge bounds =
-    let
-        width =
-            bounds.width - 1
-
-        height =
-            bounds.height - 1
-    in
-    -- make the coords and their IDs
-    List.range 0 height
-        |> List.concatMap
-            (\row ->
-                List.range 0 width
-                    |> List.map (\column -> { row = row, column = column })
-            )
-        |> List.indexedMap Tuple.pair
-        -- create a graph out of 'em!
+    List.range 0 (bounds.width * bounds.height - 1)
         |> List.foldl
-            (\( id, { row, column } ) graph ->
+            (\id graph ->
+                let
+                    row =
+                        id // bounds.width
+
+                    column =
+                        modBy bounds.width id
+                in
                 graph
                     |> Graph.insertNode id { initNode | row = row, column = column }
-                    |> (if row + 1 <= height then
-                            Graph.insertEdge id (id + width + 1) initEdge
+                    |> (if row + 1 < bounds.height then
+                            Graph.insertEdge id (id + bounds.width) initEdge
 
                         else
                             identity
                        )
-                    |> (if column + 1 <= width then
+                    |> (if column + 1 < bounds.width then
                             Graph.insertEdge id (id + 1) initEdge
 
                         else
