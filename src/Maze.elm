@@ -186,7 +186,7 @@ view maze =
                                                             , Attrs.y1 (String.fromInt (node.row * squareSize))
                                                             , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
                                                             , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
-                                                            , Attrs.class "bottom"
+                                                            , Attrs.class "right"
                                                             ]
 
                                                         else if other.row > node.row then
