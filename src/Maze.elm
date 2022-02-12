@@ -64,7 +64,6 @@ hexes initNode initEdge bounds =
                     |> Graph.insertNode id { initNode | row = row, column = column }
             )
             Graph.empty
-        |> Debug.log "ids"
         |> Hexes bounds
 
 
@@ -138,8 +137,8 @@ view maze =
         Squares bounds graph ->
             viewSquares bounds graph
 
-        Hexes _ _ ->
-            Html.text "TODO"
+        Hexes bounds graph ->
+            viewHexes bounds graph
 
 
 viewSquares : { width : Int, height : Int } -> Graph { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
@@ -221,6 +220,103 @@ viewSquares bounds graph =
                     ++ String.fromInt (bounds.width * squareSize)
                     ++ " "
                     ++ String.fromInt (bounds.height * squareSize)
+            ]
+
+
+viewHexes : { width : Int, height : Int } -> Graph { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
+viewHexes bounds graph =
+    let
+        hexRadius =
+            25
+
+        hexPoints =
+            List.range 1 6
+                |> List.map
+                    (\i ->
+                        ( hexRadius * sin (toFloat i * 2 * pi / 6)
+                        , hexRadius * cos (toFloat i * 2 * pi / 6)
+                        )
+                    )
+
+        ( hexWidth, hexHeight ) =
+            hexPoints
+                |> List.foldl
+                    (\( x, y ) ( ( minX, maxX ), ( minY, maxY ) ) ->
+                        ( ( if x < minX then
+                                x
+
+                            else
+                                minX
+                          , if x > maxX then
+                                x
+
+                            else
+                                maxX
+                          )
+                        , ( if y < minY then
+                                y
+
+                            else
+                                minY
+                          , if y > maxY then
+                                y
+
+                            else
+                                maxY
+                          )
+                        )
+                    )
+                    ( ( 0, 0 ), ( 0, 0 ) )
+                |> (\( ( minX, maxX ), ( minY, maxY ) ) ->
+                        ( maxX - minX, maxY - minY )
+                   )
+
+        hatHeight =
+            case hexPoints of
+                _ :: ( _, br ) :: ( _, bot ) :: _ ->
+                    abs bot - abs br
+
+                _ ->
+                    0
+
+        hexPointsAttr =
+            hexPoints
+                |> List.map (\( x, y ) -> String.fromFloat x ++ "," ++ String.fromFloat y)
+                |> String.join " "
+                |> Attrs.points
+    in
+    Graph.nodes graph
+        |> Dict.toList
+        |> List.map
+            (\( id, { row, column } ) ->
+                let
+                    offsetX =
+                        hexWidth * toFloat column + hexWidth / 2 + ((hexWidth / 2) * toFloat (modBy 2 row))
+
+                    offsetY =
+                        (hexHeight - hatHeight) * toFloat row + hexHeight / 2
+                in
+                Svg.g
+                    [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
+                    [ Svg.polygon
+                        [ Attrs.fill "#CCC"
+                        , Attrs.stroke "#000"
+
+                        -- above this line should be parameterized eventually
+                        , hexPointsAttr
+                        ]
+                        []
+                    ]
+            )
+        |> Svg.svg
+            [ Attrs.width "250"
+            , Attrs.height "250"
+            , Attrs.style "border: 1px solid black"
+            , Attrs.viewBox <|
+                "0 0 "
+                    ++ String.fromFloat (toFloat bounds.width * hexWidth + hexWidth / 2)
+                    ++ " "
+                    ++ String.fromFloat (toFloat bounds.height * (hexHeight - hatHeight) + hatHeight)
             ]
 
 
