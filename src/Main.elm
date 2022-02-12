@@ -11,10 +11,10 @@ import Svg.Styled as Svg
 
 tenByTen : Maze { row : Int, column : Int } { wall : Bool }
 tenByTen =
-    Maze.squares
+    Maze.hexes
         { row = -1, column = -1 }
         { wall = True }
-        { width = 10, height = 10 }
+        { width = 10, height = 12 }
 
 
 main : RootHtml.Html msg
