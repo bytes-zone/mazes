@@ -299,8 +299,7 @@ viewHexes bounds graph =
                 Svg.g
                     [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
                     [ Svg.polygon
-                        [ Attrs.fill "#CCC"
-                        , Attrs.stroke "#000"
+                        [ Attrs.fill "#FCFCFC"
 
                         -- above this line should be parameterized eventually
                         , hexPointsAttr
