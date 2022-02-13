@@ -476,6 +476,16 @@ viewHexes bounds graph =
 
                   else
                     Nothing
+                , if row == 0 then
+                    Just lines.topRight
+
+                  else
+                    Nothing
+                , if row == 0 then
+                    Just lines.topLeft
+
+                  else
+                    Nothing
                 ]
                     |> List.filterMap identity
                     |> Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
