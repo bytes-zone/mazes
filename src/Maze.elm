@@ -456,6 +456,11 @@ viewHexes bounds graph =
                         [ "red", "orange", "yellow", "green", "blue", "purple" ]
                         |> Svg.g []
                     )
+                , if column == 0 then
+                    Just lines.left
+
+                  else
+                    Nothing
                 ]
                     |> List.filterMap identity
                     |> Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
