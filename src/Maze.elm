@@ -299,7 +299,7 @@ viewHexes bounds graph =
                 [ ( brX, brY ), ( trX, trY ), ( tX, tY ), ( tlX, tlY ), ( blX, blY ), ( bX, bY ) ] ->
                     { topRight =
                         Svg.line
-                            [ Attrs.stroke "red"
+                            [ Attrs.stroke "black"
 
                             -- style above should come from attribute
                             , Attrs.x1 (String.fromFloat tX)
@@ -310,7 +310,7 @@ viewHexes bounds graph =
                             []
                     , right =
                         Svg.line
-                            [ Attrs.stroke "orange"
+                            [ Attrs.stroke "black"
 
                             -- style above should come from attribute
                             , Attrs.x1 (String.fromFloat trX)
@@ -321,7 +321,7 @@ viewHexes bounds graph =
                             []
                     , botRight =
                         Svg.line
-                            [ Attrs.stroke "yellow"
+                            [ Attrs.stroke "black"
 
                             -- style above should come from attribute
                             , Attrs.x1 (String.fromFloat brX)
@@ -332,7 +332,7 @@ viewHexes bounds graph =
                             []
                     , botLeft =
                         Svg.line
-                            [ Attrs.stroke "green"
+                            [ Attrs.stroke "black"
 
                             -- style above should come from attribute
                             , Attrs.x1 (String.fromFloat bX)
@@ -343,7 +343,7 @@ viewHexes bounds graph =
                             []
                     , left =
                         Svg.line
-                            [ Attrs.stroke "blue"
+                            [ Attrs.stroke "black"
 
                             -- style above should come from attribute
                             , Attrs.x1 (String.fromFloat blX)
@@ -354,7 +354,7 @@ viewHexes bounds graph =
                             []
                     , topLeft =
                         Svg.line
-                            [ Attrs.stroke "purple"
+                            [ Attrs.stroke "black"
 
                             -- style above should come from attribute
                             , Attrs.x1 (String.fromFloat tlX)
