@@ -441,36 +441,21 @@ viewHexes bounds graph =
                         , hexPointsAttr
                         ]
                         []
-                , if row == 0 then
-                    Just lines.topRight
-
-                  else
-                    Nothing
-                , if walls.right then
-                    Just lines.right
-
-                  else
-                    Nothing
-                , if walls.botRight then
-                    Just lines.botRight
-
-                  else
-                    Nothing
-                , if walls.botLeft || (column == 0 && modBy 2 row == 0) then
-                    Just lines.botLeft
-
-                  else
-                    Nothing
-                , if column == 0 then
-                    Just lines.left
-
-                  else
-                    Nothing
-                , if row == 0 || (column == 0 && modBy 2 row == 0) then
-                    Just lines.topLeft
-
-                  else
-                    Nothing
+                , Just
+                    (List.map2
+                        (\( cx, cy ) color ->
+                            Svg.circle
+                                [ Attrs.cx (String.fromFloat cx)
+                                , Attrs.cy (String.fromFloat cy)
+                                , Attrs.r "2"
+                                , Attrs.fill color
+                                ]
+                                []
+                        )
+                        hexPoints
+                        [ "red", "orange", "yellow", "green", "blue", "purple" ]
+                        |> Svg.g []
+                    )
                 ]
                     |> List.filterMap identity
                     |> Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
