@@ -435,7 +435,7 @@ viewHexes bounds graph =
                 in
                 [ Just <|
                     Svg.polygon
-                        [ Attrs.fill "#FCFCFC"
+                        [ Attrs.fill "#EEE"
 
                         -- above this line should be parameterized eventually
                         , hexPointsAttr
