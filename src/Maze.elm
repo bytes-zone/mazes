@@ -521,7 +521,6 @@ debugView maze =
                     |> Maybe.map Dict.toList
                     |> Maybe.withDefault []
                     |> List.filterMap (\( otherId, edge ) -> Maybe.map (Tuple.pair ( otherId, edge )) (Graph.node otherId graph))
-                    -- |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
                     |> List.map (\stuff -> Html.dd [] [ Html.text (Debug.toString stuff) ])
                     |> (::) (Html.dt [] [ Html.text (String.fromInt id ++ " (" ++ Debug.toString node ++ ")") ])
             )
