@@ -476,7 +476,7 @@ viewHexes bounds graph =
 
                   else
                     Nothing
-                , if row == 0 then
+                , if row == 0 || (column + 1 == bounds.width && modBy 2 row == 1) then
                     Just lines.topRight
 
                   else
