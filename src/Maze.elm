@@ -288,15 +288,15 @@ viewHexes bounds graph =
 
         hatHeight =
             case hexPoints of
-                _ :: ( _, br ) :: ( _, bot ) :: _ ->
-                    abs bot - abs br
+                _ :: ( _, bl ) :: ( _, bot ) :: _ ->
+                    abs bot - abs bl
 
                 _ ->
                     0
 
         lines =
             case hexPoints of
-                [ ( trX, trY ), ( brX, brY ), ( bX, bY ), ( blX, blY ), ( tlX, tlY ), ( tX, tY ) ] ->
+                [ ( brX, brY ), ( trX, trY ), ( tX, tY ), ( tlX, tlY ), ( blX, blY ), ( bX, bY ) ] ->
                     { topRight =
                         Svg.line
                             [ Attrs.stroke "red"
