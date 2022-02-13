@@ -406,12 +406,27 @@ viewHexes bounds graph =
                             |> List.filterMap (\otherId -> Graph.node otherId graph)
                             |> List.filter (\other -> other.column > column || other.row > row)
                             |> List.foldl
+                                {-
+                                   1 2 3
+                                    4 5 6
+                                   7 8 9
+                                -}
                                 (\other acc ->
                                     if other.row == row && other.column == column + 1 then
                                         { acc | right = True }
 
+                                    else if other.column == column then
+                                        if modBy 2 row == 0 then
+                                            { acc | botRight = True }
+
+                                        else
+                                            { acc | botLeft = True }
+
+                                    else if modBy 2 row == 0 then
+                                        { acc | botLeft = True }
+
                                     else
-                                        acc
+                                        { acc | botRight = True }
                                 )
                                 { right = False
                                 , botRight = False
