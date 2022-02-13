@@ -461,7 +461,12 @@ viewHexes bounds graph =
 
                   else
                     Nothing
-                , if column + 1 == bounds.width then
+                , if walls.botRight || (modBy 2 row == 1 && column + 1 == bounds.width) then
+                    Just lines.botRight
+
+                  else
+                    Nothing
+                , if walls.right || column + 1 == bounds.width then
                     Just lines.right
 
                   else
