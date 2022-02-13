@@ -438,21 +438,25 @@ viewHexes bounds graph =
 
 debugView : Maze { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
 debugView maze =
-    case maze of
-        Squares bounds graph ->
-            Graph.nodes graph
-                |> Dict.toList
-                |> List.concatMap
-                    (\( id, node ) ->
-                        Graph.neighbors id graph
-                            |> Maybe.map Dict.toList
-                            |> Maybe.withDefault []
-                            |> List.filterMap (\( otherId, edge ) -> Maybe.map (Tuple.pair ( otherId, edge )) (Graph.node otherId graph))
-                            -- |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
-                            |> List.map (\stuff -> Html.dd [] [ Html.text (Debug.toString stuff) ])
-                            |> (::) (Html.dt [] [ Html.text (String.fromInt id ++ " (" ++ Debug.toString node ++ ")") ])
-                    )
-                |> Html.dl []
+    let
+        graph =
+            case maze of
+                Squares _ g ->
+                    g
 
-        Hexes _ _ ->
-            Html.text "TODO"
+                Hexes _ g ->
+                    g
+    in
+    Graph.nodes graph
+        |> Dict.toList
+        |> List.concatMap
+            (\( id, node ) ->
+                Graph.neighbors id graph
+                    |> Maybe.map Dict.toList
+                    |> Maybe.withDefault []
+                    |> List.filterMap (\( otherId, edge ) -> Maybe.map (Tuple.pair ( otherId, edge )) (Graph.node otherId graph))
+                    -- |> List.filter (\( _, other ) -> other.column > node.column || other.row > node.row)
+                    |> List.map (\stuff -> Html.dd [] [ Html.text (Debug.toString stuff) ])
+                    |> (::) (Html.dt [] [ Html.text (String.fromInt id ++ " (" ++ Debug.toString node ++ ")") ])
+            )
+        |> Html.dl []
