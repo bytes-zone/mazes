@@ -481,7 +481,7 @@ viewHexes bounds graph =
 
                   else
                     Nothing
-                , if row == 0 then
+                , if row == 0 || (column == 0 && modBy 2 row == 0) then
                     Just lines.topLeft
 
                   else
