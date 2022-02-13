@@ -456,12 +456,17 @@ viewHexes bounds graph =
 
                   else
                     Nothing
-                , if walls.botLeft then
+                , if walls.botLeft || (column == 0 && modBy 2 row == 0) then
                     Just lines.botLeft
 
                   else
                     Nothing
-                , if row == 0 then
+                , if column == 0 then
+                    Just lines.left
+
+                  else
+                    Nothing
+                , if row == 0 || (column == 0 && modBy 2 row == 0) then
                     Just lines.topLeft
 
                   else
