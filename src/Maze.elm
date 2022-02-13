@@ -391,22 +391,32 @@ viewHexes bounds graph =
                     offsetY =
                         (hexHeight - hatHeight) * toFloat row + hexHeight / 2
                 in
-                Svg.g
-                    [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
-                    [ Svg.polygon
+                [ Just <|
+                    Svg.polygon
                         [ Attrs.fill "#FCFCFC"
 
                         -- above this line should be parameterized eventually
                         , hexPointsAttr
                         ]
                         []
-                    , lines.topRight
-                    , lines.right
-                    , lines.botRight
-                    , lines.botLeft
-                    , lines.left
-                    , lines.topLeft
-                    ]
+                , if row == 0 then
+                    Just lines.topRight
+
+                  else
+                    Nothing
+
+                -- , Just lines.right
+                -- , Just lines.botRight
+                -- , Just lines.botLeft
+                -- , Just lines.left
+                , if row == 0 then
+                    Just lines.topLeft
+
+                  else
+                    Nothing
+                ]
+                    |> List.filterMap identity
+                    |> Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
             )
         |> Svg.svg
             [ Attrs.width "250"
