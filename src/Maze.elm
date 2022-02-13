@@ -390,6 +390,33 @@ viewHexes bounds graph =
 
                     offsetY =
                         (hexHeight - hatHeight) * toFloat row + hexHeight / 2
+
+                    walls =
+                        Graph.neighbors id graph
+                            |> Maybe.map Dict.toList
+                            |> Maybe.withDefault []
+                            |> List.filterMap
+                                (\( otherId, { wall } ) ->
+                                    if wall then
+                                        Just otherId
+
+                                    else
+                                        Nothing
+                                )
+                            |> List.filterMap (\otherId -> Graph.node otherId graph)
+                            |> List.filter (\other -> other.column > column || other.row > row)
+                            |> List.foldl
+                                (\other acc ->
+                                    if other.row == row && other.column == column + 1 then
+                                        { acc | right = True }
+
+                                    else
+                                        acc
+                                )
+                                { right = False
+                                , botRight = False
+                                , botLeft = False
+                                }
                 in
                 [ Just <|
                     Svg.polygon
@@ -404,11 +431,21 @@ viewHexes bounds graph =
 
                   else
                     Nothing
+                , if walls.right then
+                    Just lines.right
 
-                -- , Just lines.right
-                -- , Just lines.botRight
-                -- , Just lines.botLeft
-                -- , Just lines.left
+                  else
+                    Nothing
+                , if walls.botRight then
+                    Just lines.botRight
+
+                  else
+                    Nothing
+                , if walls.botLeft then
+                    Just lines.botLeft
+
+                  else
+                    Nothing
                 , if row == 0 then
                     Just lines.topLeft
 
