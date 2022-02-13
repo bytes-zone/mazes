@@ -273,27 +273,11 @@ viewHexes bounds graph =
             hexPoints
                 |> List.foldl
                     (\( x, y ) ( ( minX, maxX ), ( minY, maxY ) ) ->
-                        ( ( if x < minX then
-                                x
-
-                            else
-                                minX
-                          , if x > maxX then
-                                x
-
-                            else
-                                maxX
+                        ( ( min x minX
+                          , max x maxX
                           )
-                        , ( if y < minY then
-                                y
-
-                            else
-                                minY
-                          , if y > maxY then
-                                y
-
-                            else
-                                maxY
+                        , ( min y minY
+                          , max y maxY
                           )
                         )
                     )
