@@ -279,6 +279,86 @@ viewHexes bounds graph =
                 _ ->
                     0
 
+        lines =
+            case hexPoints of
+                [ ( trX, trY ), ( brX, brY ), ( bX, bY ), ( blX, blY ), ( tlX, tlY ), ( tX, tY ) ] ->
+                    { topRight =
+                        Svg.line
+                            [ Attrs.stroke "red"
+
+                            -- style above should come from attribute
+                            , Attrs.x1 (String.fromFloat tX)
+                            , Attrs.y1 (String.fromFloat tY)
+                            , Attrs.x2 (String.fromFloat trX)
+                            , Attrs.y2 (String.fromFloat trY)
+                            ]
+                            []
+                    , right =
+                        Svg.line
+                            [ Attrs.stroke "orange"
+
+                            -- style above should come from attribute
+                            , Attrs.x1 (String.fromFloat trX)
+                            , Attrs.y1 (String.fromFloat trY)
+                            , Attrs.x2 (String.fromFloat brX)
+                            , Attrs.y2 (String.fromFloat brY)
+                            ]
+                            []
+                    , botRight =
+                        Svg.line
+                            [ Attrs.stroke "yellow"
+
+                            -- style above should come from attribute
+                            , Attrs.x1 (String.fromFloat brX)
+                            , Attrs.y1 (String.fromFloat brY)
+                            , Attrs.x2 (String.fromFloat bX)
+                            , Attrs.y2 (String.fromFloat bY)
+                            ]
+                            []
+                    , botLeft =
+                        Svg.line
+                            [ Attrs.stroke "green"
+
+                            -- style above should come from attribute
+                            , Attrs.x1 (String.fromFloat bX)
+                            , Attrs.y1 (String.fromFloat bY)
+                            , Attrs.x2 (String.fromFloat blX)
+                            , Attrs.y2 (String.fromFloat blY)
+                            ]
+                            []
+                    , left =
+                        Svg.line
+                            [ Attrs.stroke "blue"
+
+                            -- style above should come from attribute
+                            , Attrs.x1 (String.fromFloat blX)
+                            , Attrs.y1 (String.fromFloat blY)
+                            , Attrs.x2 (String.fromFloat tlX)
+                            , Attrs.y2 (String.fromFloat tlY)
+                            ]
+                            []
+                    , topLeft =
+                        Svg.line
+                            [ Attrs.stroke "purple"
+
+                            -- style above should come from attribute
+                            , Attrs.x1 (String.fromFloat tlX)
+                            , Attrs.y1 (String.fromFloat tlY)
+                            , Attrs.x2 (String.fromFloat tX)
+                            , Attrs.y2 (String.fromFloat tY)
+                            ]
+                            []
+                    }
+
+                _ ->
+                    { topRight = Svg.text "topRight"
+                    , right = Svg.text "right"
+                    , botRight = Svg.text "botRight"
+                    , botLeft = Svg.text "botLeft"
+                    , left = Svg.text "left"
+                    , topLeft = Svg.text "topLeft"
+                    }
+
         hexPointsAttr =
             hexPoints
                 |> List.map (\( x, y ) -> String.fromFloat x ++ "," ++ String.fromFloat y)
@@ -305,6 +385,12 @@ viewHexes bounds graph =
                         , hexPointsAttr
                         ]
                         []
+                    , lines.topRight
+                    , lines.right
+                    , lines.botRight
+                    , lines.botLeft
+                    , lines.left
+                    , lines.topLeft
                     ]
             )
         |> Svg.svg
