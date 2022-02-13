@@ -44,6 +44,13 @@ squares initNode initEdge bounds =
         |> Squares bounds
 
 
+{-|
+
+     1 2 3
+      4 5 6
+     7 8 9
+
+-}
 hexes :
     { node | row : Int, column : Int }
     -> { edge | wall : Bool }
@@ -59,9 +66,33 @@ hexes initNode initEdge bounds =
 
                     column =
                         modBy bounds.width id
+
+                    toBottomLeft =
+                        id + bounds.width - modBy 2 (row + 1)
+
+                    toBottomRight =
+                        id + bounds.width + modBy 2 row
                 in
                 graph
                     |> Graph.insertNode id { initNode | row = row, column = column }
+                    |> (if column + 1 < bounds.width then
+                            Graph.insertEdge id (id + 1) initEdge
+
+                        else
+                            identity
+                       )
+                    |> (if row + 1 < bounds.height && (column > 0 || modBy 2 row == 1) then
+                            Graph.insertEdge id toBottomLeft initEdge
+
+                        else
+                            identity
+                       )
+                    |> (if row + 1 < bounds.height && (column + 1 < bounds.width || modBy 2 row == 0) then
+                            Graph.insertEdge id toBottomRight initEdge
+
+                        else
+                            identity
+                       )
             )
             Graph.empty
         |> Hexes bounds
