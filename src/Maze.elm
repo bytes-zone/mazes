@@ -9,11 +9,8 @@ import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Attrs
 
 
-squares :
-    { node | row : Int, column : Int }
-    -> { width : Int, height : Int }
-    -> Maze { node | row : Int, column : Int }
-squares initNode bounds =
+squares : { width : Int, height : Int } -> Maze
+squares bounds =
     List.range 0 (bounds.width * bounds.height - 1)
         |> List.foldl
             (\id graph ->
@@ -25,7 +22,7 @@ squares initNode bounds =
                         modBy bounds.width id
                 in
                 graph
-                    |> Graph.insertNode id { initNode | row = row, column = column }
+                    |> Graph.insertNode id { row = row, column = column }
                     |> (if row + 1 < bounds.height then
                             Graph.insertEdge id (id + bounds.width) { wall = True }
 
@@ -50,11 +47,8 @@ squares initNode bounds =
      7 8 9
 
 -}
-hexes :
-    { node | row : Int, column : Int }
-    -> { width : Int, height : Int }
-    -> Maze { node | row : Int, column : Int }
-hexes initNode bounds =
+hexes : { width : Int, height : Int } -> Maze
+hexes bounds =
     List.range 0 (bounds.width * bounds.height - 1)
         |> List.foldl
             (\id graph ->
@@ -72,7 +66,7 @@ hexes initNode bounds =
                         id + bounds.width + modBy 2 row
                 in
                 graph
-                    |> Graph.insertNode id { initNode | row = row, column = column }
+                    |> Graph.insertNode id { row = row, column = column }
                     |> (if column + 1 < bounds.width then
                             Graph.insertEdge id (id + 1) { wall = True }
 
@@ -96,16 +90,22 @@ hexes initNode bounds =
         |> Hexes bounds
 
 
+type alias Node =
+    { row : Int
+    , column : Int
+    }
+
+
 type alias Edge =
     { wall : Bool }
 
 
-type Maze node
-    = Squares { width : Int, height : Int } (Graph node Edge)
-    | Hexes { width : Int, height : Int } (Graph node Edge)
+type Maze
+    = Squares { width : Int, height : Int } (Graph Node Edge)
+    | Hexes { width : Int, height : Int } (Graph Node Edge)
 
 
-generate : Int -> Int -> Maze node -> Random.Seed -> Maze node
+generate : Int -> Int -> Maze -> Random.Seed -> Maze
 generate start end maze seed =
     case maze of
         Squares bounds squares_ ->
@@ -164,7 +164,7 @@ generateHelp stack visited end graph seed =
                             nextSeed
 
 
-view : Maze { node | row : Int, column : Int } -> Html msg
+view : Maze -> Html msg
 view maze =
     case maze of
         Squares bounds graph ->
@@ -174,7 +174,7 @@ view maze =
             viewHexes bounds graph
 
 
-viewSquares : { width : Int, height : Int } -> Graph { node | row : Int, column : Int } Edge -> Html msg
+viewSquares : { width : Int, height : Int } -> Graph Node Edge -> Html msg
 viewSquares bounds graph =
     let
         squareSize =
@@ -256,7 +256,7 @@ viewSquares bounds graph =
             ]
 
 
-viewHexes : { width : Int, height : Int } -> Graph { node | row : Int, column : Int } { edge | wall : Bool } -> Html msg
+viewHexes : { width : Int, height : Int } -> Graph Node Edge -> Html msg
 viewHexes bounds graph =
     let
         hexRadius =
@@ -477,7 +477,7 @@ viewHexes bounds graph =
             ]
 
 
-debugView : Maze { node | row : Int, column : Int } -> Html msg
+debugView : Maze -> Html msg
 debugView maze =
     let
         graph =
