@@ -429,21 +429,6 @@ viewHexes bounds graph =
                         , hexPointsAttr
                         ]
                         []
-                , Just
-                    (List.map2
-                        (\( cx, cy ) color ->
-                            Svg.circle
-                                [ Attrs.cx (String.fromFloat cx)
-                                , Attrs.cy (String.fromFloat cy)
-                                , Attrs.r "2"
-                                , Attrs.fill color
-                                ]
-                                []
-                        )
-                        hexPoints
-                        [ "red", "orange", "yellow", "green", "blue", "purple" ]
-                        |> Svg.g []
-                    )
                 , if column == 0 then
                     Just lines.left
 
