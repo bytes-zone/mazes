@@ -295,6 +295,20 @@ viewSquares attrs bounds graph =
 
                               else
                                 Nothing
+                            , if node.column + 1 == bounds.width then
+                                Just <|
+                                    Svg.line
+                                        (attrs.wall
+                                            ++ [ Attrs.x1 (String.fromInt (node.column * squareSize + squareSize))
+                                               , Attrs.y1 (String.fromInt (node.row * squareSize))
+                                               , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
+                                               , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
+                                               ]
+                                        )
+                                        []
+
+                              else
+                                Nothing
                             ]
                 in
                 box :: borders ++ walls
