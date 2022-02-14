@@ -147,14 +147,45 @@ type Maze
     | Hexes { width : Int, height : Int } (Graph Cell Wall)
 
 
-generate : Int -> Int -> Maze -> Random.Seed -> Maze
-generate start end maze seed =
+generate : Random.Seed -> Maze -> Maze
+generate seed maze =
     case maze of
         Squares bounds squares_ ->
-            Squares bounds (generateHelp [ start ] (Set.singleton start) end squares_ seed)
+            case ( findRole Entrance squares_, findRole Exit squares_ ) of
+                ( Just start, Just end ) ->
+                    Squares bounds (generateHelp [ start ] (Set.singleton start) end squares_ seed)
+
+                _ ->
+                    maze
 
         Hexes bounds hexes_ ->
-            Hexes bounds (generateHelp [ start ] (Set.singleton start) end hexes_ seed)
+            case ( findRole Entrance hexes_, findRole Exit hexes_ ) of
+                ( Just start, Just end ) ->
+                    Hexes bounds (generateHelp [ start ] (Set.singleton start) end hexes_ seed)
+
+                _ ->
+                    maze
+
+
+findRole : Role -> Graph Cell Wall -> Maybe Int
+findRole target graph =
+    let
+        recur todo =
+            case todo of
+                ( id, { role } ) :: rest ->
+                    if role == Just target then
+                        Just id
+
+                    else
+                        recur rest
+
+                [] ->
+                    Nothing
+    in
+    graph
+        |> Graph.nodes
+        |> Dict.toList
+        |> recur
 
 
 generateHelp : List Int -> Set Int -> Int -> Graph node Wall -> Random.Seed -> Graph node Wall

@@ -27,9 +27,9 @@ main =
         , Html.h2 [] [ Html.text "Ungenerated" ]
         , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } tenByTen
         , Html.h2 [] [ Html.text "Generated" ]
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate 0 99 tenByTen (Random.initialSeed 0))
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate 0 99 tenByTen (Random.initialSeed 1))
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate 0 99 tenByTen (Random.initialSeed 2))
+        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate (Random.initialSeed 0) tenByTen)
+        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate (Random.initialSeed 1) tenByTen)
+        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate (Random.initialSeed 2) tenByTen)
         ]
         |> Html.toUnstyled
 
