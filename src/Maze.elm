@@ -274,11 +274,30 @@ viewSquares attrs bounds graph =
                                                     -- with any other conditions
                                                     Debug.todo "another condition"
                                                )
+                                            ++ attrs.wall
                                         )
                                         []
                                 )
+
+                    borders =
+                        List.filterMap identity
+                            [ if node.column == 0 then
+                                Just <|
+                                    Svg.line
+                                        (attrs.wall
+                                            ++ [ Attrs.x1 (String.fromInt (node.column * squareSize))
+                                               , Attrs.y1 (String.fromInt (node.row * squareSize))
+                                               , Attrs.x2 (String.fromInt (node.column * squareSize))
+                                               , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
+                                               ]
+                                        )
+                                        []
+
+                              else
+                                Nothing
+                            ]
                 in
-                box :: walls
+                box :: borders ++ walls
             )
         |> Svg.svg
             [ Attrs.width "250"
