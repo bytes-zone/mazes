@@ -229,15 +229,14 @@ viewSquares attrs bounds graph =
                 let
                     box =
                         Svg.rect
-                            [ Attrs.fill "#FCFCFC"
-
-                            -- attrs above here should eventually come in from a parameter
-                            , Attrs.x (String.fromInt (node.column * squareSize))
-                            , Attrs.y (String.fromInt (node.row * squareSize))
-                            , Attrs.width (String.fromInt squareSize)
-                            , Attrs.height (String.fromInt squareSize)
-                            , Attrs.class ("id-" ++ String.fromInt id)
-                            ]
+                            (attrs.cell node
+                                ++ [ Attrs.x (String.fromInt (node.column * squareSize))
+                                   , Attrs.y (String.fromInt (node.row * squareSize))
+                                   , Attrs.width (String.fromInt squareSize)
+                                   , Attrs.height (String.fromInt squareSize)
+                                   , Attrs.class ("id-" ++ String.fromInt id)
+                                   ]
+                            )
                             []
 
                     walls =
@@ -250,10 +249,7 @@ viewSquares attrs bounds graph =
                             |> List.map
                                 (\( edge, other ) ->
                                     Svg.line
-                                        (Attrs.stroke "black"
-                                            :: Attrs.strokeWidth "4"
-                                            -- attrs above here should eventually come in from a parameter
-                                            :: Attrs.class ("edge-" ++ String.fromInt id)
+                                        (Attrs.class ("edge-" ++ String.fromInt id)
                                             :: (if other.column > node.column then
                                                     -- line goes to the right of the node
                                                     [ Attrs.x1 (String.fromInt (node.column * squareSize + squareSize))
