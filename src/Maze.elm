@@ -206,7 +206,7 @@ generateHelp stack visited end graph seed =
                             nextSeed
 
 
-view : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg) } -> Maze -> Html msg
+view : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg), container : List (Html.Attribute msg) } -> Maze -> Html msg
 view attrs maze =
     case maze of
         Squares bounds graph ->
@@ -216,7 +216,7 @@ view attrs maze =
             viewHexes attrs bounds graph
 
 
-viewSquares : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
+viewSquares : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg), container : List (Html.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
 viewSquares attrs bounds graph =
     let
         squareSize =
@@ -314,20 +314,17 @@ viewSquares attrs bounds graph =
                 box :: borders ++ walls
             )
         |> Svg.svg
-            [ Attrs.width "250"
-            , Attrs.height "250"
-            , Attrs.style "border: 1px solid black"
-
-            -- things above this should eventually end up in a passed-in attribute.
-            , Attrs.viewBox <|
-                "0 0 "
+            (Attrs.viewBox
+                ("0 0 "
                     ++ String.fromInt (bounds.width * squareSize)
                     ++ " "
                     ++ String.fromInt (bounds.height * squareSize)
-            ]
+                )
+                :: attrs.container
+            )
 
 
-viewHexes : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
+viewHexes : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg), container : List (Html.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
 viewHexes attrs bounds graph =
     let
         hexRadius =
@@ -524,15 +521,14 @@ viewHexes attrs bounds graph =
                     |> Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
             )
         |> Svg.svg
-            [ Attrs.width "250"
-            , Attrs.height "250"
-            , Attrs.style "border: 1px solid black"
-            , Attrs.viewBox <|
-                "0 0 "
+            (Attrs.viewBox
+                ("0 0 "
                     ++ String.fromFloat (toFloat bounds.width * hexWidth + hexWidth / 2)
                     ++ " "
                     ++ String.fromFloat (toFloat bounds.height * (hexHeight - hatHeight) + hatHeight)
-            ]
+                )
+                :: attrs.container
+            )
 
 
 debugView : Maze -> Html msg
