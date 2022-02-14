@@ -43,8 +43,8 @@ containerAttrs =
 
 wallAttrs : List (Svg.Attribute msg)
 wallAttrs =
-    [ Attrs.stroke "#37474F"
-    , Attrs.strokeWidth "2"
+    [ Attrs.stroke "#546E7A"
+    , Attrs.strokeWidth "5"
     ]
 
 
