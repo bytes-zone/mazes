@@ -1,4 +1,4 @@
-module Maze exposing (Maze, debugView, generate, hexes, squares, view)
+module Maze exposing (Cell, Maze, Role(..), Wall, debugView, generate, hexes, squares, view)
 
 import Dict
 import Graph exposing (Graph)
@@ -9,27 +9,45 @@ import Svg.Styled as Svg exposing (Svg)
 import Svg.Styled.Attributes as Attrs
 
 
-squares : { width : Int, height : Int } -> Maze
-squares bounds =
-    List.range 0 (bounds.width * bounds.height - 1)
+squares :
+    { width : Int
+    , height : Int
+    , entrance : { row : Int, column : Int }
+    , exit : { row : Int, column : Int }
+    }
+    -> Maze
+squares params =
+    List.range 0 (params.width * params.height - 1)
         |> List.foldl
             (\id graph ->
                 let
                     row =
-                        id // bounds.width
+                        id // params.width
 
                     column =
-                        modBy bounds.width id
+                        modBy params.width id
                 in
                 graph
-                    |> Graph.insertNode id { row = row, column = column }
-                    |> (if row + 1 < bounds.height then
-                            Graph.insertEdge id (id + bounds.width) { wall = True }
+                    |> Graph.insertNode id
+                        { row = row
+                        , column = column
+                        , role =
+                            if params.entrance.row == row && params.entrance.column == column then
+                                Just Entrance
+
+                            else if params.exit.row == row && params.exit.column == column then
+                                Just Exit
+
+                            else
+                                Nothing
+                        }
+                    |> (if row + 1 < params.height then
+                            Graph.insertEdge id (id + params.width) { wall = True }
 
                         else
                             identity
                        )
-                    |> (if column + 1 < bounds.width then
+                    |> (if column + 1 < params.width then
                             Graph.insertEdge id (id + 1) { wall = True }
 
                         else
@@ -37,7 +55,7 @@ squares bounds =
                        )
             )
             Graph.empty
-        |> Squares bounds
+        |> Squares { width = params.width, height = params.height }
 
 
 {-|
@@ -47,39 +65,57 @@ squares bounds =
      7 8 9
 
 -}
-hexes : { width : Int, height : Int } -> Maze
-hexes bounds =
-    List.range 0 (bounds.width * bounds.height - 1)
+hexes :
+    { width : Int
+    , height : Int
+    , entrance : { row : Int, column : Int }
+    , exit : { row : Int, column : Int }
+    }
+    -> Maze
+hexes params =
+    List.range 0 (params.width * params.height - 1)
         |> List.foldl
             (\id graph ->
                 let
                     row =
-                        id // bounds.width
+                        id // params.width
 
                     column =
-                        modBy bounds.width id
+                        modBy params.width id
 
                     toBottomLeft =
-                        id + bounds.width - modBy 2 (row + 1)
+                        id + params.width - modBy 2 (row + 1)
 
                     toBottomRight =
-                        id + bounds.width + modBy 2 row
+                        id + params.width + modBy 2 row
                 in
                 graph
-                    |> Graph.insertNode id { row = row, column = column }
-                    |> (if column + 1 < bounds.width then
+                    |> Graph.insertNode id
+                        { row = row
+                        , column = column
+                        , role =
+                            if params.entrance.row == row && params.entrance.column == column then
+                                Just Entrance
+
+                            else if params.exit.row == row && params.exit.column == column then
+                                Just Exit
+
+                            else
+                                Nothing
+                        }
+                    |> (if column + 1 < params.width then
                             Graph.insertEdge id (id + 1) { wall = True }
 
                         else
                             identity
                        )
-                    |> (if row + 1 < bounds.height && (column > 0 || modBy 2 row == 1) then
+                    |> (if row + 1 < params.height && (column > 0 || modBy 2 row == 1) then
                             Graph.insertEdge id toBottomLeft { wall = True }
 
                         else
                             identity
                        )
-                    |> (if row + 1 < bounds.height && (column + 1 < bounds.width || modBy 2 row == 0) then
+                    |> (if row + 1 < params.height && (column + 1 < params.width || modBy 2 row == 0) then
                             Graph.insertEdge id toBottomRight { wall = True }
 
                         else
@@ -87,22 +123,28 @@ hexes bounds =
                        )
             )
             Graph.empty
-        |> Hexes bounds
+        |> Hexes { width = params.width, height = params.height }
 
 
-type alias Node =
+type Role
+    = Entrance
+    | Exit
+
+
+type alias Cell =
     { row : Int
     , column : Int
+    , role : Maybe Role
     }
 
 
-type alias Edge =
+type alias Wall =
     { wall : Bool }
 
 
 type Maze
-    = Squares { width : Int, height : Int } (Graph Node Edge)
-    | Hexes { width : Int, height : Int } (Graph Node Edge)
+    = Squares { width : Int, height : Int } (Graph Cell Wall)
+    | Hexes { width : Int, height : Int } (Graph Cell Wall)
 
 
 generate : Int -> Int -> Maze -> Random.Seed -> Maze
@@ -115,7 +157,7 @@ generate start end maze seed =
             Hexes bounds (generateHelp [ start ] (Set.singleton start) end hexes_ seed)
 
 
-generateHelp : List Int -> Set Int -> Int -> Graph node Edge -> Random.Seed -> Graph node Edge
+generateHelp : List Int -> Set Int -> Int -> Graph node Wall -> Random.Seed -> Graph node Wall
 generateHelp stack visited end graph seed =
     case stack of
         [] ->
@@ -164,18 +206,18 @@ generateHelp stack visited end graph seed =
                             nextSeed
 
 
-view : Maze -> Html msg
-view maze =
+view : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg) } -> Maze -> Html msg
+view attrs maze =
     case maze of
         Squares bounds graph ->
-            viewSquares bounds graph
+            viewSquares attrs bounds graph
 
         Hexes bounds graph ->
-            viewHexes bounds graph
+            viewHexes attrs bounds graph
 
 
-viewSquares : { width : Int, height : Int } -> Graph Node Edge -> Html msg
-viewSquares bounds graph =
+viewSquares : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
+viewSquares attrs bounds graph =
     let
         squareSize =
             50
@@ -256,8 +298,8 @@ viewSquares bounds graph =
             ]
 
 
-viewHexes : { width : Int, height : Int } -> Graph Node Edge -> Html msg
-viewHexes bounds graph =
+viewHexes : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
+viewHexes attrs bounds graph =
     let
         hexRadius =
             25
@@ -301,69 +343,63 @@ viewHexes bounds graph =
                 [ ( brX, brY ), ( trX, trY ), ( tX, tY ), ( tlX, tlY ), ( blX, blY ), ( bX, bY ) ] ->
                     { topRight =
                         Svg.line
-                            [ Attrs.stroke "black"
-
-                            -- style above should come from attribute
-                            , Attrs.x1 (String.fromFloat tX)
-                            , Attrs.y1 (String.fromFloat tY)
-                            , Attrs.x2 (String.fromFloat trX)
-                            , Attrs.y2 (String.fromFloat trY)
-                            ]
+                            (attrs.wall
+                                ++ [ Attrs.x1 (String.fromFloat tX)
+                                   , Attrs.y1 (String.fromFloat tY)
+                                   , Attrs.x2 (String.fromFloat trX)
+                                   , Attrs.y2 (String.fromFloat trY)
+                                   ]
+                            )
                             []
                     , right =
                         Svg.line
-                            [ Attrs.stroke "black"
-
-                            -- style above should come from attribute
-                            , Attrs.x1 (String.fromFloat trX)
-                            , Attrs.y1 (String.fromFloat trY)
-                            , Attrs.x2 (String.fromFloat brX)
-                            , Attrs.y2 (String.fromFloat brY)
-                            ]
+                            (attrs.wall
+                                ++ [ Attrs.x1 (String.fromFloat trX)
+                                   , Attrs.y1 (String.fromFloat trY)
+                                   , Attrs.x2 (String.fromFloat brX)
+                                   , Attrs.y2 (String.fromFloat brY)
+                                   ]
+                            )
                             []
                     , botRight =
                         Svg.line
-                            [ Attrs.stroke "black"
-
-                            -- style above should come from attribute
-                            , Attrs.x1 (String.fromFloat brX)
-                            , Attrs.y1 (String.fromFloat brY)
-                            , Attrs.x2 (String.fromFloat bX)
-                            , Attrs.y2 (String.fromFloat bY)
-                            ]
+                            (attrs.wall
+                                ++ [ Attrs.x1 (String.fromFloat brX)
+                                   , Attrs.y1 (String.fromFloat brY)
+                                   , Attrs.x2 (String.fromFloat bX)
+                                   , Attrs.y2 (String.fromFloat bY)
+                                   ]
+                            )
                             []
                     , botLeft =
                         Svg.line
-                            [ Attrs.stroke "black"
-
-                            -- style above should come from attribute
-                            , Attrs.x1 (String.fromFloat bX)
-                            , Attrs.y1 (String.fromFloat bY)
-                            , Attrs.x2 (String.fromFloat blX)
-                            , Attrs.y2 (String.fromFloat blY)
-                            ]
+                            (attrs.wall
+                                ++ [ Attrs.x1 (String.fromFloat bX)
+                                   , Attrs.y1 (String.fromFloat bY)
+                                   , Attrs.x2 (String.fromFloat blX)
+                                   , Attrs.y2 (String.fromFloat blY)
+                                   ]
+                            )
                             []
                     , left =
                         Svg.line
-                            [ Attrs.stroke "black"
-
-                            -- style above should come from attribute
-                            , Attrs.x1 (String.fromFloat blX)
-                            , Attrs.y1 (String.fromFloat blY)
-                            , Attrs.x2 (String.fromFloat tlX)
-                            , Attrs.y2 (String.fromFloat tlY)
-                            ]
+                            (attrs.wall
+                                ++ [ Attrs.x1 (String.fromFloat blX)
+                                   , Attrs.y1 (String.fromFloat blY)
+                                   , Attrs.x2 (String.fromFloat tlX)
+                                   , Attrs.y2 (String.fromFloat tlY)
+                                   ]
+                            )
                             []
                     , topLeft =
                         Svg.line
-                            [ Attrs.stroke "black"
-
-                            -- style above should come from attribute
-                            , Attrs.x1 (String.fromFloat tlX)
-                            , Attrs.y1 (String.fromFloat tlY)
-                            , Attrs.x2 (String.fromFloat tX)
-                            , Attrs.y2 (String.fromFloat tY)
-                            ]
+                            (attrs.wall
+                                ++ [ Attrs.x1 (String.fromFloat tlX)
+                                   , Attrs.y1 (String.fromFloat tlY)
+                                   , Attrs.x2 (String.fromFloat tX)
+                                   , Attrs.y2 (String.fromFloat tY)
+                                   ]
+                            )
                             []
                     }
 
@@ -385,7 +421,7 @@ viewHexes bounds graph =
     Graph.nodes graph
         |> Dict.toList
         |> List.map
-            (\( id, { row, column } ) ->
+            (\( id, { row, column } as cell ) ->
                 let
                     offsetX =
                         hexWidth * toFloat column + hexWidth / 2 + ((hexWidth / 2) * toFloat (modBy 2 row))
@@ -423,14 +459,7 @@ viewHexes bounds graph =
                                 , botLeft = False
                                 }
                 in
-                [ Just <|
-                    Svg.polygon
-                        [ Attrs.fill "#EEE"
-
-                        -- above this line should be parameterized eventually
-                        , hexPointsAttr
-                        ]
-                        []
+                [ Just <| Svg.polygon (hexPointsAttr :: attrs.cell cell) []
                 , if column == 0 then
                     Just lines.left
 
