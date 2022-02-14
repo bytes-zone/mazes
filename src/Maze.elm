@@ -278,41 +278,56 @@ viewSquares attrs bounds graph =
                                         )
                                         []
                                 )
-
-                    borders =
-                        List.filterMap identity
-                            [ if node.column == 0 then
-                                Just <|
-                                    Svg.line
-                                        (attrs.wall
-                                            ++ [ Attrs.x1 (String.fromInt (node.column * squareSize))
-                                               , Attrs.y1 (String.fromInt (node.row * squareSize))
-                                               , Attrs.x2 (String.fromInt (node.column * squareSize))
-                                               , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
-                                               ]
-                                        )
-                                        []
-
-                              else
-                                Nothing
-                            , if node.column + 1 == bounds.width then
-                                Just <|
-                                    Svg.line
-                                        (attrs.wall
-                                            ++ [ Attrs.x1 (String.fromInt (node.column * squareSize + squareSize))
-                                               , Attrs.y1 (String.fromInt (node.row * squareSize))
-                                               , Attrs.x2 (String.fromInt (node.column * squareSize + squareSize))
-                                               , Attrs.y2 (String.fromInt (node.row * squareSize + squareSize))
-                                               ]
-                                        )
-                                        []
-
-                              else
-                                Nothing
-                            ]
                 in
-                box :: borders ++ walls
+                box :: walls
             )
+        |> (\nodes ->
+                let
+                    maxX =
+                        String.fromInt (bounds.width * squareSize)
+
+                    maxY =
+                        String.fromInt (bounds.height * squareSize)
+                in
+                nodes
+                    ++ [ Svg.line
+                            (attrs.wall
+                                ++ [ Attrs.x1 "0"
+                                   , Attrs.y1 "0"
+                                   , Attrs.x2 "0"
+                                   , Attrs.y2 maxY
+                                   ]
+                            )
+                            []
+                       , Svg.line
+                            (attrs.wall
+                                ++ [ Attrs.x1 "0"
+                                   , Attrs.y1 "0"
+                                   , Attrs.x1 maxX
+                                   , Attrs.y2 "0"
+                                   ]
+                            )
+                            []
+                       , Svg.line
+                            (attrs.wall
+                                ++ [ Attrs.x1 maxX
+                                   , Attrs.y1 "0"
+                                   , Attrs.x2 maxX
+                                   , Attrs.y2 maxY
+                                   ]
+                            )
+                            []
+                       , Svg.line
+                            (attrs.wall
+                                ++ [ Attrs.x1 "0"
+                                   , Attrs.y1 maxY
+                                   , Attrs.x2 maxX
+                                   , Attrs.y2 maxY
+                                   ]
+                            )
+                            []
+                       ]
+           )
         |> Svg.svg
             (Attrs.viewBox
                 ("0 0 "
