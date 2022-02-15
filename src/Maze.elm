@@ -251,7 +251,7 @@ viewSquares : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attrib
 viewSquares attrs bounds graph =
     let
         squareSize =
-            50
+            25
     in
     Graph.nodes graph
         |> Dict.toList
