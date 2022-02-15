@@ -584,10 +584,10 @@ viewHexes attrs bounds graph =
     in
     Svg.svg
         (Attrs.viewBox
-            ("0 0 "
-                ++ String.fromFloat (toFloat bounds.width * hexWidth + hexWidth / 2)
+            ("-5 -5 "
+                ++ String.fromFloat (toFloat bounds.width * hexWidth + hexWidth / 2 + 10)
                 ++ " "
-                ++ String.fromFloat (toFloat bounds.height * (hexHeight - hatHeight) + hatHeight)
+                ++ String.fromFloat (toFloat bounds.height * (hexHeight - hatHeight) + hatHeight + 10)
             )
             :: attrs.container
         )
