@@ -1,4 +1,4 @@
-module Route exposing (Route(..), parse, toAbsolutePath)
+module Route exposing (MazeShape(..), Route(..), parse, toAbsolutePath)
 
 import Url exposing (Url)
 import Url.Builder as Builder
@@ -8,8 +8,13 @@ import Url.Parser.Query as Query
 
 type Route
     = Home
-    | Maze { seed : Int, width : Maybe Int, height : Maybe Int }
+    | Maze { shape : MazeShape, seed : Int, width : Maybe Int, height : Maybe Int }
     | NotFound
+
+
+type MazeShape
+    = Squares
+    | Hexes
 
 
 parse : Url -> Route
@@ -21,12 +26,28 @@ parser : Parser (Route -> b) b
 parser =
     oneOf
         [ map
-            (\seed width height ->
-                Maze { seed = seed, width = width, height = height }
+            (\shape seed width height ->
+                Maze { shape = shape, seed = seed, width = width, height = height }
             )
-            (top </> s "maze" </> int <?> Query.int "width" <?> Query.int "height")
+            (top </> s "maze" </> mazeShapeParser </> int <?> Query.int "width" <?> Query.int "height")
         , map Home top
         ]
+
+
+mazeShapeParser : Parser (MazeShape -> b) b
+mazeShapeParser =
+    Parser.custom "SHAPE"
+        (\segment ->
+            case segment of
+                "squares" ->
+                    Just Squares
+
+                "hexes" ->
+                    Just Hexes
+
+                _ ->
+                    Nothing
+        )
 
 
 toAbsolutePath : Route -> String
@@ -35,8 +56,12 @@ toAbsolutePath route =
         Home ->
             Builder.absolute [] []
 
-        Maze { seed, width, height } ->
-            Builder.absolute [ "maze", String.fromInt seed ]
+        Maze { shape, seed, width, height } ->
+            Builder.absolute
+                [ "maze"
+                , shapeToSegment shape
+                , String.fromInt seed
+                ]
                 (List.filterMap identity
                     [ Maybe.map (Builder.int "width") width
                     , Maybe.map (Builder.int "height") height
@@ -45,3 +70,13 @@ toAbsolutePath route =
 
         NotFound ->
             Builder.absolute [ "404" ] []
+
+
+shapeToSegment : MazeShape -> String
+shapeToSegment shape =
+    case shape of
+        Squares ->
+            "squares"
+
+        Hexes ->
+            "hexes"

@@ -25,7 +25,16 @@ routeFuzzer : Fuzzer Route
 routeFuzzer =
     Fuzz.oneOf
         [ Fuzz.constant Route.Home
-        , Fuzz.map3 (\seed width height -> Route.Maze { seed = seed, width = width, height = height })
+        , Fuzz.map4
+            (\shape seed width height ->
+                Route.Maze
+                    { shape = shape
+                    , seed = seed
+                    , width = width
+                    , height = height
+                    }
+            )
+            mazeShapeFuzzer
             (Fuzz.intRange 0 1)
             maybeDimensionFuzzer
             maybeDimensionFuzzer
@@ -38,4 +47,12 @@ maybeDimensionFuzzer =
     Fuzz.oneOf
         [ Fuzz.constant Nothing
         , Fuzz.map Just (Fuzz.intRange 0 1)
+        ]
+
+
+mazeShapeFuzzer : Fuzzer Route.MazeShape
+mazeShapeFuzzer =
+    Fuzz.oneOf
+        [ Fuzz.constant Route.Squares
+        , Fuzz.constant Route.Hexes
         ]
