@@ -12,7 +12,7 @@ import Svg.Styled.Attributes as Attrs
 
 tenByTen : Maze
 tenByTen =
-    Maze.squares
+    Maze.hexes
         { width = 10
         , height = 12
         , entrance = { row = 0, column = 0 }
@@ -44,7 +44,8 @@ containerAttrs =
 wallAttrs : List (Svg.Attribute msg)
 wallAttrs =
     [ Attrs.stroke "#546E7A"
-    , Attrs.strokeWidth "5"
+    , Attrs.strokeWidth "3"
+    , Attrs.strokeLinecap "round"
     ]
 
 
