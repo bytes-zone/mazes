@@ -492,92 +492,106 @@ viewHexes attrs bounds graph =
                 |> List.map (\( x, y ) -> String.fromFloat x ++ "," ++ String.fromFloat y)
                 |> String.join " "
                 |> Attrs.points
+
+        ( cells, walls ) =
+            Graph.nodes graph
+                |> Dict.toList
+                |> List.map
+                    (\( id, { row, column } as cell ) ->
+                        let
+                            offsetX =
+                                hexWidth * toFloat column + hexWidth / 2 + ((hexWidth / 2) * toFloat (modBy 2 row))
+
+                            offsetY =
+                                (hexHeight - hatHeight) * toFloat row + hexHeight / 2
+
+                            hasWall =
+                                Graph.neighbors id graph
+                                    |> Maybe.map Dict.toList
+                                    |> Maybe.withDefault []
+                                    |> List.filterMap
+                                        (\( otherId, { wall } ) ->
+                                            if wall then
+                                                Just otherId
+
+                                            else
+                                                Nothing
+                                        )
+                                    |> List.filterMap (\otherId -> Graph.node otherId graph)
+                                    |> List.foldl
+                                        {-
+                                           1 2 3
+                                            4 5 6
+                                           7 8 9
+                                        -}
+                                        (\other acc ->
+                                            { right = acc.right || (other.row == row && other.column > column)
+                                            , botRight = acc.botRight || (other.row > row && other.column == column + modBy 2 row)
+                                            , botLeft = acc.botLeft || (other.row > row && other.column == column - modBy 2 (row + 1))
+                                            }
+                                        )
+                                        { right = False
+                                        , botRight = False
+                                        , botLeft = False
+                                        }
+
+                            repositioner =
+                                Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
+                        in
+                        ( repositioner [ Svg.polygon (hexPointsAttr :: attrs.cell cell) [] ]
+                        , [ if column == 0 then
+                                Just lines.left
+
+                            else
+                                Nothing
+                          , if hasWall.botLeft || (column == 0 && modBy 2 row == 0) || row + 1 == bounds.height then
+                                Just lines.botLeft
+
+                            else
+                                Nothing
+                          , if hasWall.botRight || (modBy 2 row == 1 && column + 1 == bounds.width) || row + 1 == bounds.height then
+                                Just lines.botRight
+
+                            else
+                                Nothing
+                          , if hasWall.right || column + 1 == bounds.width then
+                                Just lines.right
+
+                            else
+                                Nothing
+                          , if row == 0 || (column + 1 == bounds.width && modBy 2 row == 1) then
+                                Just lines.topRight
+
+                            else
+                                Nothing
+                          , if row == 0 || (column == 0 && modBy 2 row == 0) then
+                                Just lines.topLeft
+
+                            else
+                                Nothing
+                          ]
+                            |> List.filterMap identity
+                            |> repositioner
+                        )
+                    )
+                |> List.foldr
+                    (\( nextCell, nextWall ) ( prevCells, prevWalls ) ->
+                        ( nextCell :: prevCells
+                        , nextWall :: prevWalls
+                        )
+                    )
+                    ( [], [] )
     in
-    Graph.nodes graph
-        |> Dict.toList
-        |> List.map
-            (\( id, { row, column } as cell ) ->
-                let
-                    offsetX =
-                        hexWidth * toFloat column + hexWidth / 2 + ((hexWidth / 2) * toFloat (modBy 2 row))
-
-                    offsetY =
-                        (hexHeight - hatHeight) * toFloat row + hexHeight / 2
-
-                    walls =
-                        Graph.neighbors id graph
-                            |> Maybe.map Dict.toList
-                            |> Maybe.withDefault []
-                            |> List.filterMap
-                                (\( otherId, { wall } ) ->
-                                    if wall then
-                                        Just otherId
-
-                                    else
-                                        Nothing
-                                )
-                            |> List.filterMap (\otherId -> Graph.node otherId graph)
-                            |> List.foldl
-                                {-
-                                   1 2 3
-                                    4 5 6
-                                   7 8 9
-                                -}
-                                (\other acc ->
-                                    { right = acc.right || (other.row == row && other.column > column)
-                                    , botRight = acc.botRight || (other.row > row && other.column == column + modBy 2 row)
-                                    , botLeft = acc.botLeft || (other.row > row && other.column == column - modBy 2 (row + 1))
-                                    }
-                                )
-                                { right = False
-                                , botRight = False
-                                , botLeft = False
-                                }
-                in
-                [ Just <| Svg.polygon (hexPointsAttr :: attrs.cell cell) []
-                , if column == 0 then
-                    Just lines.left
-
-                  else
-                    Nothing
-                , if walls.botLeft || (column == 0 && modBy 2 row == 0) || row + 1 == bounds.height then
-                    Just lines.botLeft
-
-                  else
-                    Nothing
-                , if walls.botRight || (modBy 2 row == 1 && column + 1 == bounds.width) || row + 1 == bounds.height then
-                    Just lines.botRight
-
-                  else
-                    Nothing
-                , if walls.right || column + 1 == bounds.width then
-                    Just lines.right
-
-                  else
-                    Nothing
-                , if row == 0 || (column + 1 == bounds.width && modBy 2 row == 1) then
-                    Just lines.topRight
-
-                  else
-                    Nothing
-                , if row == 0 || (column == 0 && modBy 2 row == 0) then
-                    Just lines.topLeft
-
-                  else
-                    Nothing
-                ]
-                    |> List.filterMap identity
-                    |> Svg.g [ Attrs.transform ("translate(" ++ String.fromFloat offsetX ++ "," ++ String.fromFloat offsetY ++ ")") ]
+    Svg.svg
+        (Attrs.viewBox
+            ("0 0 "
+                ++ String.fromFloat (toFloat bounds.width * hexWidth + hexWidth / 2)
+                ++ " "
+                ++ String.fromFloat (toFloat bounds.height * (hexHeight - hatHeight) + hatHeight)
             )
-        |> Svg.svg
-            (Attrs.viewBox
-                ("0 0 "
-                    ++ String.fromFloat (toFloat bounds.width * hexWidth + hexWidth / 2)
-                    ++ " "
-                    ++ String.fromFloat (toFloat bounds.height * (hexHeight - hatHeight) + hatHeight)
-                )
-                :: attrs.container
-            )
+            :: attrs.container
+        )
+        (cells ++ walls)
 
 
 debugView : Maze -> Html msg
