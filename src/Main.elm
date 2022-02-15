@@ -21,6 +21,7 @@ type alias Flags =
 type alias Model =
     { key : Navigation.Key
     , route : Route
+    , nextSeed : Int
     }
 
 
@@ -31,11 +32,11 @@ type Msg
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init () url key =
-    ( { key = key
-      , route = Route.parse url
-      }
-    , Cmd.none
-    )
+    enforceRedirection
+        { key = key
+        , route = Route.parse url
+        , nextSeed = 0 -- TODO: get from flags
+        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -52,13 +53,22 @@ update msg model =
             )
 
         OnUrlChange url ->
-            let
-                route =
-                    Route.parse url
-            in
-            ( { model | route = route }
-            , Cmd.none
-            )
+            enforceRedirection { model | route = Route.parse url }
+
+
+enforceRedirection : Model -> ( Model, Cmd Msg )
+enforceRedirection model =
+    if model.route == Route.Home then
+        ( { model | nextSeed = model.nextSeed + 1 }
+        , Route.Maze { seed = model.nextSeed, width = Just 10, height = Just 10 }
+            |> Route.toAbsolutePath
+            |> Navigation.replaceUrl model.key
+        )
+
+    else
+        ( model
+        , Cmd.none
+        )
 
 
 view : Model -> Browser.Document msg
