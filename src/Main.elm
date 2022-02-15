@@ -8,6 +8,7 @@ import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as HAttrs exposing (css)
 import Maze exposing (Maze)
 import Random
+import Route exposing (Route)
 import Svg.Styled as Svg
 import Svg.Styled.Attributes as Attrs
 import Url exposing (Url)
@@ -19,35 +20,64 @@ type alias Flags =
 
 type alias Model =
     { key : Navigation.Key
-    , seed : Random.Seed
+    , route : Route
     }
 
 
 type Msg
-    = OnUrlChange Url
-    | OnUrlRequest Browser.UrlRequest
+    = OnUrlRequest Browser.UrlRequest
+    | OnUrlChange Url
 
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
-init () _ key =
+init () url key =
     ( { key = key
-      , seed = Random.initialSeed 0 -- eventually: flags.seed
+      , route = Route.parse url
       }
     , Cmd.none
     )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update _ model =
-    ( model
-    , Cmd.none
-    )
+update msg model =
+    case msg of
+        OnUrlRequest (Browser.Internal url) ->
+            ( model
+            , Navigation.pushUrl model.key (Url.toString url)
+            )
+
+        OnUrlRequest (Browser.External url) ->
+            ( model
+            , Navigation.load url
+            )
+
+        OnUrlChange url ->
+            let
+                route =
+                    Route.parse url
+            in
+            ( { model | route = route }
+            , Cmd.none
+            )
 
 
 view : Model -> Browser.Document msg
 view model =
     { title = "Nate's Mazes"
-    , body = []
+    , body =
+        [ Html.main_ []
+            [ case model.route of
+                Route.Home ->
+                    Html.text "home"
+
+                Route.Maze info ->
+                    Html.text (Debug.toString info)
+
+                Route.NotFound ->
+                    Html.text "not found"
+            ]
+            |> Html.toUnstyled
+        ]
     }
 
 
@@ -58,8 +88,8 @@ main =
         , update = update
         , view = view
         , subscriptions = \_ -> Sub.none
-        , onUrlChange = OnUrlChange
         , onUrlRequest = OnUrlRequest
+        , onUrlChange = OnUrlChange
         }
 
 
