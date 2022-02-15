@@ -252,14 +252,58 @@ viewSquares attrs bounds graph =
     let
         squareSize =
             25
-    in
-    Graph.nodes graph
-        |> Dict.toList
-        |> List.concatMap
-            (\( id, node ) ->
-                let
-                    box =
-                        Svg.rect
+
+        maxX =
+            String.fromInt (bounds.width * squareSize)
+
+        maxY =
+            String.fromInt (bounds.height * squareSize)
+
+        borders =
+            [ Svg.line
+                (attrs.wall
+                    ++ [ Attrs.x1 "0"
+                       , Attrs.y1 "0"
+                       , Attrs.x2 "0"
+                       , Attrs.y2 maxY
+                       ]
+                )
+                []
+            , Svg.line
+                (attrs.wall
+                    ++ [ Attrs.x1 "0"
+                       , Attrs.y1 "0"
+                       , Attrs.x1 maxX
+                       , Attrs.y2 "0"
+                       ]
+                )
+                []
+            , Svg.line
+                (attrs.wall
+                    ++ [ Attrs.x1 maxX
+                       , Attrs.y1 "0"
+                       , Attrs.x2 maxX
+                       , Attrs.y2 maxY
+                       ]
+                )
+                []
+            , Svg.line
+                (attrs.wall
+                    ++ [ Attrs.x1 "0"
+                       , Attrs.y1 maxY
+                       , Attrs.x2 maxX
+                       , Attrs.y2 maxY
+                       ]
+                )
+                []
+            ]
+
+        ( cells, walls ) =
+            Graph.nodes graph
+                |> Dict.toList
+                |> List.map
+                    (\( id, node ) ->
+                        ( Svg.rect
                             (attrs.cell node
                                 ++ [ Attrs.x (String.fromInt (node.column * squareSize))
                                    , Attrs.y (String.fromInt (node.row * squareSize))
@@ -269,9 +313,7 @@ viewSquares attrs bounds graph =
                                    ]
                             )
                             []
-
-                    walls =
-                        Graph.edgesFrom id graph
+                        , Graph.edgesFrom id graph
                             |> Maybe.map Dict.toList
                             |> Maybe.withDefault []
                             |> List.filter (Tuple.second >> .wall)
@@ -309,65 +351,26 @@ viewSquares attrs bounds graph =
                                         )
                                         []
                                 )
-                in
-                box :: walls
+                        )
+                    )
+                |> List.foldr
+                    (\( thisCell, theseWalls ) ( prevCells, prevWalls ) ->
+                        ( thisCell :: prevCells
+                        , theseWalls ++ prevWalls
+                        )
+                    )
+                    ( [], [] )
+    in
+    Svg.svg
+        (Attrs.viewBox
+            ("0 0 "
+                ++ String.fromInt (bounds.width * squareSize)
+                ++ " "
+                ++ String.fromInt (bounds.height * squareSize)
             )
-        |> (\nodes ->
-                let
-                    maxX =
-                        String.fromInt (bounds.width * squareSize)
-
-                    maxY =
-                        String.fromInt (bounds.height * squareSize)
-                in
-                nodes
-                    ++ [ Svg.line
-                            (attrs.wall
-                                ++ [ Attrs.x1 "0"
-                                   , Attrs.y1 "0"
-                                   , Attrs.x2 "0"
-                                   , Attrs.y2 maxY
-                                   ]
-                            )
-                            []
-                       , Svg.line
-                            (attrs.wall
-                                ++ [ Attrs.x1 "0"
-                                   , Attrs.y1 "0"
-                                   , Attrs.x1 maxX
-                                   , Attrs.y2 "0"
-                                   ]
-                            )
-                            []
-                       , Svg.line
-                            (attrs.wall
-                                ++ [ Attrs.x1 maxX
-                                   , Attrs.y1 "0"
-                                   , Attrs.x2 maxX
-                                   , Attrs.y2 maxY
-                                   ]
-                            )
-                            []
-                       , Svg.line
-                            (attrs.wall
-                                ++ [ Attrs.x1 "0"
-                                   , Attrs.y1 maxY
-                                   , Attrs.x2 maxX
-                                   , Attrs.y2 maxY
-                                   ]
-                            )
-                            []
-                       ]
-           )
-        |> Svg.svg
-            (Attrs.viewBox
-                ("0 0 "
-                    ++ String.fromInt (bounds.width * squareSize)
-                    ++ " "
-                    ++ String.fromInt (bounds.height * squareSize)
-                )
-                :: attrs.container
-            )
+            :: attrs.container
+        )
+        (cells ++ walls ++ borders)
 
 
 viewHexes : { cell : Cell -> List (Svg.Attribute msg), wall : List (Svg.Attribute msg), container : List (Html.Attribute msg) } -> { width : Int, height : Int } -> Graph Cell Wall -> Html msg
