@@ -1,5 +1,7 @@
 module Main exposing (..)
 
+import Browser
+import Browser.Navigation as Navigation
 import Css
 import Html as RootHtml
 import Html.Styled as Html exposing (Html)
@@ -8,30 +10,53 @@ import Maze exposing (Maze)
 import Random
 import Svg.Styled as Svg
 import Svg.Styled.Attributes as Attrs
+import Url exposing (Url)
 
 
-tenByTen : Maze
-tenByTen =
-    Maze.hexes
-        { width = 10
-        , height = 12
-        , entrance = { row = 0, column = 0 }
-        , exit = { row = 11, column = 9 }
-        }
+type alias Flags =
+    ()
 
 
-main : RootHtml.Html msg
+type alias Model =
+    { key : Navigation.Key }
+
+
+type Msg
+    = OnUrlChange Url
+    | OnUrlRequest Browser.UrlRequest
+
+
+init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
+init () _ key =
+    ( { key = key }
+    , Cmd.none
+    )
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
+update _ model =
+    ( model
+    , Cmd.none
+    )
+
+
+view : Model -> Browser.Document msg
+view model =
+    { title = "Nate's Mazes"
+    , body = []
+    }
+
+
+main : Program Flags Model Msg
 main =
-    Html.main_ []
-        [ Html.h1 [] [ Html.text "Mazes!" ]
-        , Html.h2 [] [ Html.text "Ungenerated" ]
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } tenByTen
-        , Html.h2 [] [ Html.text "Generated" ]
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate (Random.initialSeed 0) tenByTen)
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate (Random.initialSeed 1) tenByTen)
-        , Maze.view { cell = cellAttrs, wall = wallAttrs, container = containerAttrs } (Maze.generate (Random.initialSeed 2) tenByTen)
-        ]
-        |> Html.toUnstyled
+    Browser.application
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = \_ -> Sub.none
+        , onUrlChange = OnUrlChange
+        , onUrlRequest = OnUrlRequest
+        }
 
 
 containerAttrs : List (Html.Attribute msg)
