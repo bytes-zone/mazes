@@ -18,7 +18,9 @@ type alias Flags =
 
 
 type alias Model =
-    { key : Navigation.Key }
+    { key : Navigation.Key
+    , seed : Random.Seed
+    }
 
 
 type Msg
@@ -28,7 +30,9 @@ type Msg
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init () _ key =
-    ( { key = key }
+    ( { key = key
+      , seed = Random.initialSeed 0 -- eventually: flags.seed
+      }
     , Cmd.none
     )
 
