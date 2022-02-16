@@ -13,6 +13,8 @@ import Random
 import Route exposing (Route)
 import Svg.Styled as Svg
 import Svg.Styled.Attributes as Attrs
+import Task
+import Time
 import Url exposing (Url)
 
 
@@ -32,6 +34,7 @@ type alias Model =
 type Msg
     = OnUrlRequest Browser.UrlRequest
     | OnUrlChange Url
+    | SetNextSeed Int
     | SetNewMazeShape Route.MazeShape
     | SetNewMazeDifficulty Int
     | StartSolvingNewMaze
@@ -41,11 +44,13 @@ init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init () url key =
     ( { key = key
       , route = Route.parse url
-      , nextSeed = 0 -- TODO: get from flags
+      , nextSeed = 0
       , newMazeShape = Route.Hexes
       , newMazeDifficulty = 10
       }
-    , Cmd.none
+    , Time.now
+        |> Task.map Time.posixToMillis
+        |> Task.perform SetNextSeed
     )
 
 
@@ -64,6 +69,11 @@ update msg model =
 
         OnUrlChange url ->
             ( { model | route = Route.parse url }
+            , Cmd.none
+            )
+
+        SetNextSeed seed ->
+            ( { model | nextSeed = seed }
             , Cmd.none
             )
 
