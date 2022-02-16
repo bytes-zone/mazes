@@ -155,11 +155,20 @@ view model =
                             , wall = wallAttrs
                             , container = [ css [ Css.width (Css.vw 95), Css.height (Css.vh 80) ] ]
                             }
-                            (baseMaze model)
+                            (baseMaze
+                                { width = model.newMazeWidth
+                                , height = model.newMazeHeight
+                                , shape = model.newMazeShape
+                                }
+                            )
                         ]
 
                 Route.Maze info ->
-                    baseMaze model
+                    baseMaze
+                        { width = Maybe.withDefault 10 info.width
+                        , height = Maybe.withDefault 10 info.height
+                        , shape = info.shape
+                        }
                         |> Maze.generate (Random.initialSeed info.seed)
                         |> Maze.view
                             { cell = cellAttrs
@@ -175,17 +184,17 @@ view model =
     }
 
 
-baseMaze : Model -> Maze
-baseMaze model =
+baseMaze : { otherStuff | width : Int, height : Int, shape : Route.MazeShape } -> Maze
+baseMaze { width, height, shape } =
     let
         dimensions =
-            { width = model.newMazeWidth
-            , height = model.newMazeHeight
+            { width = width
+            , height = height
             , entrance = { row = 0, column = 0 }
-            , exit = { row = model.newMazeHeight - 1, column = model.newMazeWidth - 1 }
+            , exit = { row = height - 1, column = width - 1 }
             }
     in
-    case model.newMazeShape of
+    case shape of
         Route.Hexes ->
             Maze.hexes dimensions
 
