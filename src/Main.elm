@@ -3,6 +3,7 @@ module Main exposing (..)
 import Browser
 import Browser.Navigation as Navigation
 import Css
+import Css.Global as Global
 import Html as RootHtml
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as HAttrs exposing (css)
@@ -63,7 +64,11 @@ view : Model -> Browser.Document msg
 view model =
     { title = "Nate's Mazes"
     , body =
-        [ Html.main_ []
+        [ Global.global
+            [ Global.everything [ Css.boxSizing Css.borderBox ]
+            , Global.body [ Css.padding (Css.px 20) ]
+            ]
+        , Html.main_ []
             [ case model.route of
                 Route.New ->
                     Html.text "new maze"
@@ -74,8 +79,8 @@ view model =
                 Route.NotFound ->
                     Html.text "not found"
             ]
-            |> Html.toUnstyled
         ]
+            |> List.map Html.toUnstyled
     }
 
 
