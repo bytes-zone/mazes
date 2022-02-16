@@ -24,7 +24,7 @@ roundTrip =
 routeFuzzer : Fuzzer Route
 routeFuzzer =
     Fuzz.oneOf
-        [ Fuzz.constant Route.Home
+        [ Fuzz.constant Route.New
         , Fuzz.map4
             (\shape seed width height ->
                 Route.Maze

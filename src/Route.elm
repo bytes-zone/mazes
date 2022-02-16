@@ -7,7 +7,7 @@ import Url.Parser.Query as Query
 
 
 type Route
-    = Home
+    = New
     | Maze { shape : MazeShape, seed : Int, width : Maybe Int, height : Maybe Int }
     | NotFound
 
@@ -30,7 +30,7 @@ parser =
                 Maze { shape = shape, seed = seed, width = width, height = height }
             )
             (top </> s "maze" </> mazeShapeParser </> int <?> Query.int "width" <?> Query.int "height")
-        , map Home top
+        , map New top
         ]
 
 
@@ -53,7 +53,7 @@ mazeShapeParser =
 toAbsolutePath : Route -> String
 toAbsolutePath route =
     case route of
-        Home ->
+        New ->
             Builder.absolute [] []
 
         Maze { shape, seed, width, height } ->

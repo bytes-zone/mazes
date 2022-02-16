@@ -65,8 +65,8 @@ view model =
     , body =
         [ Html.main_ []
             [ case model.route of
-                Route.Home ->
-                    Html.text "home"
+                Route.New ->
+                    Html.text "new maze"
 
                 Route.Maze info ->
                     Html.text (Debug.toString info)
