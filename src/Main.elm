@@ -86,8 +86,8 @@ update msg model =
             , Route.Maze
                 { shape = shape
                 , seed = model.nextSeed
-                , width = Just width
-                , height = Just height
+                , width = width
+                , height = height
                 }
                 |> Route.toAbsolutePath
                 |> Navigation.pushUrl model.key
@@ -146,11 +146,7 @@ view model =
                         ]
 
                 Route.Maze info ->
-                    baseMaze
-                        { width = Maybe.withDefault 10 info.width
-                        , height = Maybe.withDefault 10 info.height
-                        , shape = info.shape
-                        }
+                    baseMaze info
                         |> Maze.generate (Random.initialSeed info.seed)
                         |> Maze.view
                             { cell = cellAttrs

@@ -2,13 +2,13 @@ module Route exposing (MazeShape(..), Route(..), parse, toAbsolutePath)
 
 import Url exposing (Url)
 import Url.Builder as Builder
-import Url.Parser as Parser exposing ((</>), (<?>), Parser, int, map, oneOf, s, top)
+import Url.Parser as Parser exposing ((</>), Parser, int, map, oneOf, s, top)
 import Url.Parser.Query as Query
 
 
 type Route
     = New
-    | Maze { shape : MazeShape, seed : Int, width : Maybe Int, height : Maybe Int }
+    | Maze { shape : MazeShape, seed : Int, width : Int, height : Int }
     | NotFound
 
 
@@ -26,10 +26,10 @@ parser : Parser (Route -> b) b
 parser =
     oneOf
         [ map
-            (\shape seed width height ->
+            (\shape width height seed ->
                 Maze { shape = shape, seed = seed, width = width, height = height }
             )
-            (top </> s "maze" </> mazeShapeParser </> int <?> Query.int "width" <?> Query.int "height")
+            (top </> s "maze" </> mazeShapeParser </> int </> int </> int)
         , map New top
         ]
 
@@ -60,13 +60,11 @@ toAbsolutePath route =
             Builder.absolute
                 [ "maze"
                 , shapeToSegment shape
+                , String.fromInt width
+                , String.fromInt height
                 , String.fromInt seed
                 ]
-                (List.filterMap identity
-                    [ Maybe.map (Builder.int "width") width
-                    , Maybe.map (Builder.int "height") height
-                    ]
-                )
+                []
 
         NotFound ->
             Builder.absolute [ "404" ] []

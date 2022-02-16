@@ -36,17 +36,9 @@ routeFuzzer =
             )
             mazeShapeFuzzer
             (Fuzz.intRange 0 1)
-            maybeDimensionFuzzer
-            maybeDimensionFuzzer
+            (Fuzz.intRange 0 1)
+            (Fuzz.intRange 0 1)
         , Fuzz.constant Route.NotFound
-        ]
-
-
-maybeDimensionFuzzer : Fuzzer (Maybe Int)
-maybeDimensionFuzzer =
-    Fuzz.oneOf
-        [ Fuzz.constant Nothing
-        , Fuzz.map Just (Fuzz.intRange 0 1)
         ]
 
 
