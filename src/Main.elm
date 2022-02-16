@@ -32,11 +32,12 @@ type Msg
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
 init () url key =
-    enforceRedirection
-        { key = key
-        , route = Route.parse url
-        , nextSeed = 0 -- TODO: get from flags
-        }
+    ( { key = key
+      , route = Route.parse url
+      , nextSeed = 0 -- TODO: get from flags
+      }
+    , Cmd.none
+    )
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -53,22 +54,9 @@ update msg model =
             )
 
         OnUrlChange url ->
-            enforceRedirection { model | route = Route.parse url }
-
-
-enforceRedirection : Model -> ( Model, Cmd Msg )
-enforceRedirection model =
-    if model.route == Route.Home then
-        ( { model | nextSeed = model.nextSeed + 1 }
-        , Route.Maze { seed = model.nextSeed, width = Just 10, height = Just 10 }
-            |> Route.toAbsolutePath
-            |> Navigation.replaceUrl model.key
-        )
-
-    else
-        ( model
-        , Cmd.none
-        )
+            ( { model | route = Route.parse url }
+            , Cmd.none
+            )
 
 
 view : Model -> Browser.Document msg
