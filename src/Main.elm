@@ -25,8 +25,7 @@ type alias Model =
     , route : Route
     , nextSeed : Int
     , newMazeShape : Route.MazeShape
-    , newMazeWidth : Int
-    , newMazeHeight : Int
+    , newMazeDifficulty : Int
     }
 
 
@@ -34,8 +33,7 @@ type Msg
     = OnUrlRequest Browser.UrlRequest
     | OnUrlChange Url
     | SetNewMazeShape Route.MazeShape
-    | SetNewMazeWidth Int
-    | SetNewMazeHeight Int
+    | SetNewMazeDifficulty Int
     | StartSolvingNewMaze
 
 
@@ -45,8 +43,7 @@ init () url key =
       , route = Route.parse url
       , nextSeed = 0 -- TODO: get from flags
       , newMazeShape = Route.Hexes
-      , newMazeWidth = 15
-      , newMazeHeight = 10
+      , newMazeDifficulty = 10
       }
     , Cmd.none
     )
@@ -75,23 +72,22 @@ update msg model =
             , Cmd.none
             )
 
-        SetNewMazeWidth width ->
-            ( { model | newMazeWidth = width }
-            , Cmd.none
-            )
-
-        SetNewMazeHeight height ->
-            ( { model | newMazeHeight = height }
+        SetNewMazeDifficulty difficulty ->
+            ( { model | newMazeDifficulty = difficulty }
             , Cmd.none
             )
 
         StartSolvingNewMaze ->
+            let
+                { width, height, shape } =
+                    baseParams model
+            in
             ( { model | nextSeed = model.nextSeed + 1 }
             , Route.Maze
-                { shape = model.newMazeShape
+                { shape = shape
                 , seed = model.nextSeed
-                , width = Just model.newMazeWidth
-                , height = Just model.newMazeHeight
+                , width = Just width
+                , height = Just height
                 }
                 |> Route.toAbsolutePath
                 |> Navigation.pushUrl model.key
@@ -113,24 +109,13 @@ view model =
                     Html.div
                         []
                         [ Html.label []
-                            [ Html.text "Width"
+                            [ Html.text "Difficulty"
                             , Html.input
                                 [ HAttrs.type_ "range"
                                 , HAttrs.min "1"
                                 , HAttrs.max "30"
-                                , HAttrs.value (String.fromInt model.newMazeWidth)
-                                , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeWidth)
-                                ]
-                                []
-                            ]
-                        , Html.label []
-                            [ Html.text "Height"
-                            , Html.input
-                                [ HAttrs.type_ "range"
-                                , HAttrs.min "1"
-                                , HAttrs.max "30"
-                                , HAttrs.value (String.fromInt model.newMazeHeight)
-                                , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeHeight)
+                                , HAttrs.value (String.fromInt model.newMazeDifficulty)
+                                , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeDifficulty)
                                 ]
                                 []
                             ]
@@ -150,17 +135,14 @@ view model =
                         , Html.button
                             [ Events.onClick StartSolvingNewMaze ]
                             [ Html.text "Carve!" ]
-                        , Maze.view
-                            { cell = cellAttrs
-                            , wall = wallAttrs
-                            , container = [ css [ Css.width (Css.vw 95), Css.height (Css.vh 80) ] ]
-                            }
-                            (baseMaze
-                                { width = model.newMazeWidth
-                                , height = model.newMazeHeight
-                                , shape = model.newMazeShape
+                        , model
+                            |> baseParams
+                            |> baseMaze
+                            |> Maze.view
+                                { cell = cellAttrs
+                                , wall = wallAttrs
+                                , container = [ css [ Css.width (Css.vw 95), Css.height (Css.vh 80) ] ]
                                 }
-                            )
                         ]
 
                 Route.Maze info ->
@@ -181,6 +163,14 @@ view model =
             ]
         ]
             |> List.map Html.toUnstyled
+    }
+
+
+baseParams : Model -> { width : Int, height : Int, shape : Route.MazeShape }
+baseParams model =
+    { shape = model.newMazeShape
+    , width = round (toFloat model.newMazeDifficulty * 1.4)
+    , height = model.newMazeDifficulty
     }
 
 
