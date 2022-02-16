@@ -363,10 +363,10 @@ viewSquares attrs bounds graph =
     in
     Svg.svg
         (Attrs.viewBox
-            ("0 0 "
-                ++ String.fromInt (bounds.width * squareSize)
+            ("-5 -5 "
+                ++ String.fromInt (bounds.width * squareSize + 10)
                 ++ " "
-                ++ String.fromInt (bounds.height * squareSize)
+                ++ String.fromInt (bounds.height * squareSize + 10)
             )
             :: attrs.container
         )
