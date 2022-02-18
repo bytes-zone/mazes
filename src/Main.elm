@@ -182,7 +182,7 @@ controlsBar =
     Html.div
         [ css
             [ Css.displayFlex
-            , Css.alignItems Css.center
+            , Css.alignItems Css.baseline
             , Css.justifyContent Css.center
             , Css.height (Css.px 50)
 
