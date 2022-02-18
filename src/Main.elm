@@ -181,11 +181,18 @@ controlsBar : List (Html msg) -> Html msg
 controlsBar =
     Html.div
         [ css
-            [ Css.backgroundColor (Css.hex "37474F")
-            , Css.displayFlex
+            [ Css.displayFlex
             , Css.alignItems Css.center
             , Css.justifyContent Css.center
             , Css.height (Css.px 50)
+
+            -- color scheme
+            , Css.backgroundColor (Css.hex "ECEFF1")
+            , Css.color (Css.hex "37474F")
+            , darkMode
+                [ Css.backgroundColor (Css.hex "37474F")
+                , Css.color (Css.hex "ECEFF1")
+                ]
             ]
         ]
 
