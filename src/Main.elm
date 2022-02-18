@@ -150,7 +150,7 @@ viewNewFormControls model =
             [ Html.text "Difficulty:"
             , Html.input
                 [ HAttrs.type_ "range"
-                , HAttrs.min "1"
+                , HAttrs.min "2"
                 , HAttrs.max "30"
                 , HAttrs.value (String.fromInt model.newMazeDifficulty)
                 , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeDifficulty)
