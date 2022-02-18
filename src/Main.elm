@@ -154,7 +154,34 @@ viewNewFormControls model =
                 , HAttrs.max "30"
                 , HAttrs.value (String.fromInt model.newMazeDifficulty)
                 , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeDifficulty)
-                , css [ Css.margin (Css.px 10) ]
+                , let
+                    track =
+                        [ Css.height (Css.em 1)
+                        , Css.backgroundColor (Css.hex "CFD8DC")
+                        , darkMode [ Css.backgroundColor (Css.hex "263238") ]
+                        ]
+
+                    thumb =
+                        [ Css.property "-webkit-appearance" "none"
+                        , Css.height (Css.em 1.5)
+                        , Css.width (Css.em 1.5)
+                        , Css.marginTop (Css.em -0.25)
+                        , Css.borderRadius (Css.pct 25)
+                        , Css.backgroundColor (Css.hex "263238")
+                        , darkMode [ Css.backgroundColor (Css.hex "CFD8DC") ]
+                        ]
+                  in
+                  css
+                    [ Css.margin (Css.px 10)
+                    , Css.position Css.relative
+                    , Css.property "-webkit-appearance" "none"
+                    , Css.pseudoElement "-webkit-slider-runnable-track" track
+                    , Css.pseudoElement "-webkit-slider-thumb" thumb
+                    , Css.pseudoElement "-moz-range-track" track
+                    , Css.pseudoElement "-moz-range-thumb" thumb
+                    , Css.pseudoElement "-ms-track" track
+                    , Css.pseudoElement "-ms-thumb" thumb
+                    ]
                 ]
                 []
             ]
