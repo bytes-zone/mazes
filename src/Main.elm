@@ -130,7 +130,8 @@ view model =
                     ]
 
                 Route.Maze info ->
-                    [ baseMaze info
+                    [ viewMazeControls
+                    , baseMaze info
                         |> Maze.generate (Random.initialSeed info.seed)
                         |> viewMaze
                     ]
@@ -198,6 +199,15 @@ viewNewFormControls model =
         , button
             [ Events.onClick StartSolvingNewMaze ]
             [ Html.text "Carve!" ]
+        ]
+
+
+viewMazeControls : Html Msg
+viewMazeControls =
+    controlsBar
+        [ button [] [ Html.text "Back to Generator" ]
+        , button [] [ Html.text "Reset Lines" ]
+        , button [] [ Html.text "Next Maze" ]
         ]
 
 
