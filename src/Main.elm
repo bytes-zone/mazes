@@ -122,7 +122,6 @@ view model =
         , Html.main_ []
             (case model.route of
                 Route.New ->
-                    -- just dumping all the controls in here for now. Will make them look nice later.
                     [ viewNewFormControls model
                     , model
                         |> baseParams
