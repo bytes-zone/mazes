@@ -148,7 +148,7 @@ viewNewFormControls : Model -> Html Msg
 viewNewFormControls model =
     controlsBar
         [ Html.label []
-            [ Html.text "Difficulty"
+            [ Html.text "Difficulty:"
             , Html.input
                 [ HAttrs.type_ "range"
                 , HAttrs.min "1"
@@ -159,7 +159,7 @@ viewNewFormControls model =
                 []
             ]
         , Html.label []
-            [ Html.text "Shape"
+            [ Html.text "Shape:"
             , case model.newMazeShape of
                 Route.Hexes ->
                     Html.button
