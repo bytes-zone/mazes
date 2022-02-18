@@ -4,6 +4,7 @@ import Browser
 import Browser.Navigation as Navigation
 import Css
 import Css.Global as Global
+import Css.Media as Media
 import Html as RootHtml
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as HAttrs exposing (css)
@@ -110,6 +111,12 @@ view model =
     , body =
         [ Global.global
             [ Global.everything [ Css.boxSizing Css.borderBox ]
+            , Global.body
+                [ Css.backgroundColor (Css.hex "FFFFFF")
+                , darkMode
+                    [ Css.backgroundColor (Css.hex "212121")
+                    ]
+                ]
             ]
         , Html.main_ []
             [ case model.route of
@@ -176,17 +183,28 @@ viewMaze maze =
     Maze.view
         { cell =
             \{ role } ->
-                case role of
-                    Nothing ->
-                        [ Attrs.fill "#ECEFF1" ]
+                let
+                    ( light, dark ) =
+                        case role of
+                            Nothing ->
+                                ( Css.hex "ECEFF1", Css.hex "546E7A" )
 
-                    Just Maze.Entrance ->
-                        [ Attrs.fill "#B2FF59" ]
+                            Just Maze.Entrance ->
+                                ( Css.hex "B2FF59", Css.hex "64DD17" )
 
-                    Just Maze.Exit ->
-                        [ Attrs.fill "#64FFDA" ]
+                            Just Maze.Exit ->
+                                ( Css.hex "64FFDA", Css.hex "00BFA5" )
+                in
+                [ Attrs.css
+                    [ Css.fill light
+                    , darkMode [ Css.fill dark ]
+                    ]
+                ]
         , wall =
-            [ Attrs.stroke "#546E7A"
+            [ Attrs.css
+                [ Css.property "stroke" "#546E7A"
+                , darkMode [ Css.property "stroke" "#37474F" ]
+                ]
             , Attrs.strokeWidth "3"
             , Attrs.strokeLinecap "round"
             ]
@@ -231,3 +249,12 @@ main =
         , onUrlRequest = OnUrlRequest
         , onUrlChange = OnUrlChange
         }
+
+
+
+--- UTILS
+
+
+darkMode : List Css.Style -> Css.Style
+darkMode =
+    Media.withMediaQuery [ "(prefers-color-scheme: dark)" ]
