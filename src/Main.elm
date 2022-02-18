@@ -119,52 +119,51 @@ view model =
                 ]
             ]
         , Html.main_ []
-            [ case model.route of
+            (case model.route of
                 Route.New ->
                     -- just dumping all the controls in here for now. Will make them look nice later.
-                    Html.div
-                        []
-                        [ Html.label []
-                            [ Html.text "Difficulty"
-                            , Html.input
-                                [ HAttrs.type_ "range"
-                                , HAttrs.min "1"
-                                , HAttrs.max "30"
-                                , HAttrs.value (String.fromInt model.newMazeDifficulty)
-                                , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeDifficulty)
-                                ]
-                                []
+                    [ Html.label []
+                        [ Html.text "Difficulty"
+                        , Html.input
+                            [ HAttrs.type_ "range"
+                            , HAttrs.min "1"
+                            , HAttrs.max "30"
+                            , HAttrs.value (String.fromInt model.newMazeDifficulty)
+                            , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeDifficulty)
                             ]
-                        , Html.label []
-                            [ Html.text "Shape"
-                            , case model.newMazeShape of
-                                Route.Hexes ->
-                                    Html.button
-                                        [ Events.onClick (SetNewMazeShape Route.Squares) ]
-                                        [ Html.text "Change to Squares" ]
-
-                                Route.Squares ->
-                                    Html.button
-                                        [ Events.onClick (SetNewMazeShape Route.Hexes) ]
-                                        [ Html.text "Change to Hexes" ]
-                            ]
-                        , Html.button
-                            [ Events.onClick StartSolvingNewMaze ]
-                            [ Html.text "Carve!" ]
-                        , model
-                            |> baseParams
-                            |> baseMaze
-                            |> viewMaze
+                            []
                         ]
+                    , Html.label []
+                        [ Html.text "Shape"
+                        , case model.newMazeShape of
+                            Route.Hexes ->
+                                Html.button
+                                    [ Events.onClick (SetNewMazeShape Route.Squares) ]
+                                    [ Html.text "Change to Squares" ]
+
+                            Route.Squares ->
+                                Html.button
+                                    [ Events.onClick (SetNewMazeShape Route.Hexes) ]
+                                    [ Html.text "Change to Hexes" ]
+                        ]
+                    , Html.button
+                        [ Events.onClick StartSolvingNewMaze ]
+                        [ Html.text "Carve!" ]
+                    , model
+                        |> baseParams
+                        |> baseMaze
+                        |> viewMaze
+                    ]
 
                 Route.Maze info ->
-                    baseMaze info
+                    [ baseMaze info
                         |> Maze.generate (Random.initialSeed info.seed)
                         |> viewMaze
+                    ]
 
                 Route.NotFound ->
-                    Html.text "not found"
-            ]
+                    [ Html.text "not found" ]
+            )
         ]
             |> List.map Html.toUnstyled
     }
