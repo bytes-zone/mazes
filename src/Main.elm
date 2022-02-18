@@ -38,7 +38,7 @@ type Msg
     | SetNextSeed Int
     | SetNewMazeShape Route.MazeShape
     | SetNewMazeDifficulty Int
-    | StartSolvingNewMaze
+    | NextMaze
     | BackToGenerator
 
 
@@ -89,7 +89,7 @@ update msg model =
             , Cmd.none
             )
 
-        StartSolvingNewMaze ->
+        NextMaze ->
             let
                 { width, height, shape } =
                     baseParams model
@@ -203,7 +203,7 @@ viewNewFormControls model =
                     [ Events.onClick (SetNewMazeShape Route.Hexes) ]
                     [ Html.text "Change to Hexes" ]
         , button
-            [ Events.onClick StartSolvingNewMaze ]
+            [ Events.onClick NextMaze ]
             [ Html.text "Carve!" ]
         ]
 
@@ -213,7 +213,7 @@ viewMazeControls =
     controlsBar
         [ button [ Events.onClick BackToGenerator ] [ Html.text "Back to Generator" ]
         , button [] [ Html.text "Reset Lines" ]
-        , button [] [ Html.text "Next Maze" ]
+        , button [ Events.onClick NextMaze ] [ Html.text "Next Maze" ]
         ]
 
 
