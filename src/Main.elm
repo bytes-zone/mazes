@@ -39,6 +39,7 @@ type Msg
     | SetNewMazeShape Route.MazeShape
     | SetNewMazeDifficulty Int
     | StartSolvingNewMaze
+    | BackToGenerator
 
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
@@ -102,6 +103,11 @@ update msg model =
                 }
                 |> Route.toAbsolutePath
                 |> Navigation.pushUrl model.key
+            )
+
+        BackToGenerator ->
+            ( model
+            , Navigation.pushUrl model.key (Route.toAbsolutePath Route.New)
             )
 
 
@@ -205,7 +211,7 @@ viewNewFormControls model =
 viewMazeControls : Html Msg
 viewMazeControls =
     controlsBar
-        [ button [] [ Html.text "Back to Generator" ]
+        [ button [ Events.onClick BackToGenerator ] [ Html.text "Back to Generator" ]
         , button [] [ Html.text "Reset Lines" ]
         , button [] [ Html.text "Next Maze" ]
         ]
