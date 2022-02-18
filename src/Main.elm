@@ -159,19 +159,18 @@ viewNewFormControls model =
                 []
             ]
         , Html.label []
-            [ Html.text "Shape:"
-            , case model.newMazeShape of
+            [ case model.newMazeShape of
                 Route.Hexes ->
-                    Html.button
+                    button
                         [ Events.onClick (SetNewMazeShape Route.Squares) ]
                         [ Html.text "Change to Squares" ]
 
                 Route.Squares ->
-                    Html.button
+                    button
                         [ Events.onClick (SetNewMazeShape Route.Hexes) ]
                         [ Html.text "Change to Hexes" ]
             ]
-        , Html.button
+        , button
             [ Events.onClick StartSolvingNewMaze ]
             [ Html.text "Carve!" ]
         ]
@@ -285,3 +284,19 @@ main =
 darkMode : List Css.Style -> Css.Style
 darkMode =
     Media.withMediaQuery [ "(prefers-color-scheme: dark)" ]
+
+
+button : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+button attrs children =
+    Html.button
+        (css
+            [ Css.margin (Css.px 10)
+            , Css.padding2 (Css.px 7) (Css.px 10)
+            , Css.borderRadius (Css.px 2)
+            , Css.border Css.zero
+            , Css.backgroundColor (Css.hex "CFD8DC")
+            , Css.color (Css.hex "263238")
+            ]
+            :: attrs
+        )
+        children
