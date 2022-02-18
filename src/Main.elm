@@ -148,21 +148,13 @@ view model =
                         , model
                             |> baseParams
                             |> baseMaze
-                            |> Maze.view
-                                { cell = cellAttrs
-                                , wall = wallAttrs
-                                , container = [ css [ Css.width (Css.vw 95), Css.height (Css.vh 80) ] ]
-                                }
+                            |> viewMaze
                         ]
 
                 Route.Maze info ->
                     baseMaze info
                         |> Maze.generate (Random.initialSeed info.seed)
-                        |> Maze.view
-                            { cell = cellAttrs
-                            , wall = wallAttrs
-                            , container = [ css [ Css.width (Css.vw 95), Css.height (Css.vh 80) ] ]
-                            }
+                        |> viewMaze
 
                 Route.NotFound ->
                     Html.text "not found"
@@ -178,6 +170,38 @@ baseParams model =
     , width = round (toFloat model.newMazeDifficulty * 1.4)
     , height = model.newMazeDifficulty
     }
+
+
+viewMaze : Maze -> Html msg
+viewMaze maze =
+    Maze.view
+        { cell =
+            \{ role } ->
+                case role of
+                    Nothing ->
+                        [ Attrs.fill "#ECEFF1" ]
+
+                    Just Maze.Entrance ->
+                        [ Attrs.fill "#B2FF59" ]
+
+                    Just Maze.Exit ->
+                        [ Attrs.fill "#64FFDA" ]
+        , wall =
+            [ Attrs.stroke "#546E7A"
+            , Attrs.strokeWidth "3"
+            , Attrs.strokeLinecap "round"
+            ]
+        , container =
+            [ css
+                [ Css.position Css.absolute
+                , Css.top (Css.pct 7)
+                , Css.left (Css.pct 2.5)
+                , Css.width (Css.vw 95)
+                , Css.height (Css.vh 90.5)
+                ]
+            ]
+        }
+        maze
 
 
 baseMaze : { otherStuff | width : Int, height : Int, shape : Route.MazeShape } -> Maze
@@ -208,29 +232,3 @@ main =
         , onUrlRequest = OnUrlRequest
         , onUrlChange = OnUrlChange
         }
-
-
-containerAttrs : List (Html.Attribute msg)
-containerAttrs =
-    []
-
-
-wallAttrs : List (Svg.Attribute msg)
-wallAttrs =
-    [ Attrs.stroke "#546E7A"
-    , Attrs.strokeWidth "3"
-    , Attrs.strokeLinecap "round"
-    ]
-
-
-cellAttrs : Maze.Cell -> List (Svg.Attribute msg)
-cellAttrs { role } =
-    case role of
-        Nothing ->
-            [ Attrs.fill "#ECEFF1" ]
-
-        Just Maze.Entrance ->
-            [ Attrs.fill "#B2FF59" ]
-
-        Just Maze.Exit ->
-            [ Attrs.fill "#64FFDA" ]
