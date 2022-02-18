@@ -294,6 +294,10 @@ button attrs children =
             , Css.border Css.zero
             , Css.backgroundColor (Css.hex "CFD8DC")
             , Css.color (Css.hex "263238")
+            , darkMode
+                [ Css.backgroundColor (Css.hex "263238")
+                , Css.color (Css.hex "CFD8DC")
+                ]
             ]
             :: attrs
         )
