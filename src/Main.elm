@@ -6,9 +6,11 @@ import Css
 import Css.Global as Global
 import Css.Media as Media
 import Html as RootHtml
+import Html.Events.Extra.Touch as Touch
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as HAttrs exposing (css)
 import Html.Styled.Events as Events
+import Json.Decode as Decode
 import Maze exposing (Maze)
 import Random
 import Route exposing (Route)
@@ -29,6 +31,7 @@ type alias Model =
     , nextSeed : Int
     , newMazeShape : Route.MazeShape
     , newMazeDifficulty : Int
+    , drawing : List ( Float, Float )
     }
 
 
@@ -39,6 +42,7 @@ type Msg
     | SetNewMazeShape Route.MazeShape
     | SetNewMazeDifficulty Int
     | NextMaze
+    | Draw (List ( Float, Float ))
     | BackToGenerator
 
 
@@ -49,6 +53,7 @@ init () url key =
       , nextSeed = 0
       , newMazeShape = Route.Hexes
       , newMazeDifficulty = 10
+      , drawing = []
       }
     , Time.now
         |> Task.map Time.posixToMillis
@@ -94,7 +99,10 @@ update msg model =
                 { width, height, shape } =
                     baseParams model
             in
-            ( { model | nextSeed = model.nextSeed + 1 }
+            ( { model
+                | nextSeed = model.nextSeed + 1
+                , drawing = []
+              }
             , Route.Maze
                 { shape = shape
                 , seed = model.nextSeed
@@ -103,6 +111,11 @@ update msg model =
                 }
                 |> Route.toAbsolutePath
                 |> Navigation.pushUrl model.key
+            )
+
+        Draw newPoints ->
+            ( { model | drawing = newPoints ++ model.drawing }
+            , Cmd.none
             )
 
         BackToGenerator ->
@@ -137,6 +150,7 @@ view model =
 
                 Route.Maze info ->
                     [ viewMazeControls
+                    , viewCanvas model
                     , baseMaze info
                         |> Maze.generate (Random.initialSeed info.seed)
                         |> viewMaze
@@ -235,6 +249,40 @@ controlsBar =
                 ]
             ]
         ]
+
+
+viewCanvas : Model -> Html Msg
+viewCanvas model =
+    model.drawing
+        |> List.map
+            (\( x, y ) ->
+                Svg.circle
+                    [ Attrs.cx (String.fromFloat x)
+                    , Attrs.cy (String.fromFloat y)
+                    , Attrs.r "15"
+                    , Attrs.css
+                        [ Css.fill (Css.hex "76FF03")
+                        , darkMode [ Css.fill (Css.hex "CCFF90") ]
+                        ]
+                    ]
+                    []
+            )
+        |> Svg.svg
+            [ Attrs.css
+                [ Css.position Css.absolute
+                , Css.zIndex (Css.int 1)
+                , Css.top (Css.px 0)
+                , Css.left (Css.px 0)
+                , Css.width (Css.vw 100)
+                , Css.height (Css.vh 100)
+                ]
+            , Events.on "touchmove"
+                (Touch.eventDecoder
+                    |> Decode.map .touches
+                    |> Decode.map (List.map .clientPos)
+                    |> Decode.map Draw
+                )
+            ]
 
 
 baseParams : Model -> { width : Int, height : Int, shape : Route.MazeShape }
