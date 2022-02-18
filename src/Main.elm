@@ -315,7 +315,8 @@ button : List (Html.Attribute msg) -> List (Html msg) -> Html msg
 button attrs children =
     Html.button
         (css
-            [ Css.margin (Css.px 10)
+            [ Css.fontSize (Css.em 0.9)
+            , Css.margin (Css.px 10)
             , Css.padding2 (Css.px 7) (Css.px 10)
             , Css.borderRadius (Css.px 2)
             , Css.border Css.zero
