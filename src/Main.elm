@@ -155,6 +155,7 @@ viewNewFormControls model =
                 , HAttrs.max "30"
                 , HAttrs.value (String.fromInt model.newMazeDifficulty)
                 , Events.onInput (String.toInt >> Maybe.withDefault 10 >> SetNewMazeDifficulty)
+                , css [ Css.margin (Css.px 10) ]
                 ]
                 []
             ]
