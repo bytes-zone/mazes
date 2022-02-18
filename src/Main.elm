@@ -110,7 +110,6 @@ view model =
     , body =
         [ Global.global
             [ Global.everything [ Css.boxSizing Css.borderBox ]
-            , Global.body [ Css.padding (Css.px 20) ]
             ]
         , Html.main_ []
             [ case model.route of
