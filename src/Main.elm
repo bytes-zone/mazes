@@ -112,7 +112,8 @@ view model =
         [ Global.global
             [ Global.everything [ Css.boxSizing Css.borderBox ]
             , Global.body
-                [ Css.backgroundColor (Css.hex "FFFFFF")
+                [ Css.fontFamily Css.sansSerif
+                , Css.backgroundColor (Css.hex "FFFFFF")
                 , darkMode
                     [ Css.backgroundColor (Css.hex "212121")
                     ]
