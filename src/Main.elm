@@ -159,18 +159,16 @@ viewNewFormControls model =
                 ]
                 []
             ]
-        , Html.label []
-            [ case model.newMazeShape of
-                Route.Hexes ->
-                    button
-                        [ Events.onClick (SetNewMazeShape Route.Squares) ]
-                        [ Html.text "Change to Squares" ]
+        , case model.newMazeShape of
+            Route.Hexes ->
+                button
+                    [ Events.onClick (SetNewMazeShape Route.Squares) ]
+                    [ Html.text "Change to Squares" ]
 
-                Route.Squares ->
-                    button
-                        [ Events.onClick (SetNewMazeShape Route.Hexes) ]
-                        [ Html.text "Change to Hexes" ]
-            ]
+            Route.Squares ->
+                button
+                    [ Events.onClick (SetNewMazeShape Route.Hexes) ]
+                    [ Html.text "Change to Hexes" ]
         , button
             [ Events.onClick StartSolvingNewMaze ]
             [ Html.text "Carve!" ]
