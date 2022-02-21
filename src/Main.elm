@@ -276,11 +276,11 @@ viewCanvas model =
                 , Css.width (Css.vw 100)
                 , Css.height (Css.vh 100)
                 ]
-            , Events.on "touchmove"
+            , Events.preventDefaultOn "touchmove"
                 (Touch.eventDecoder
                     |> Decode.map .touches
                     |> Decode.map (List.map .clientPos)
-                    |> Decode.map Draw
+                    |> Decode.map (\touches -> ( Draw touches, True ))
                 )
             ]
 
