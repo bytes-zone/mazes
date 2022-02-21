@@ -239,6 +239,8 @@ controlsBar =
             , Css.alignItems Css.baseline
             , Css.justifyContent Css.center
             , Css.height (Css.px 50)
+            , Css.zIndex (Css.int 2)
+            , Css.position Css.relative
 
             -- color scheme
             , Css.backgroundColor (Css.hex "ECEFF1")
