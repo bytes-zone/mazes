@@ -44,6 +44,7 @@ type Msg
     | SetNewMazeDifficulty Int
     | NextMaze
     | Draw (List Touch)
+    | ResetLines
     | BackToGenerator
 
 
@@ -133,6 +134,11 @@ update msg model =
                         model.drawing
                         newTouches
               }
+            , Cmd.none
+            )
+
+        ResetLines ->
+            ( { model | drawing = Dict.empty }
             , Cmd.none
             )
 
@@ -244,7 +250,7 @@ viewMazeControls : Html Msg
 viewMazeControls =
     controlsBar
         [ button [ Events.onClick BackToGenerator ] [ Html.text "Back to Generator" ]
-        , button [] [ Html.text "Reset Lines" ]
+        , button [ Events.onClick ResetLines ] [ Html.text "Reset Lines" ]
         , button [ Events.onClick NextMaze ] [ Html.text "Next Maze" ]
         ]
 
