@@ -5,8 +5,9 @@ import Browser.Navigation as Navigation
 import Css
 import Css.Global as Global
 import Css.Media as Media
+import Dict exposing (Dict)
 import Html as RootHtml
-import Html.Events.Extra.Touch as Touch
+import Html.Events.Extra.Touch as Touch exposing (Touch)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as HAttrs exposing (css)
 import Html.Styled.Events as Events
@@ -31,7 +32,7 @@ type alias Model =
     , nextSeed : Int
     , newMazeShape : Route.MazeShape
     , newMazeDifficulty : Int
-    , drawing : List ( Float, Float )
+    , drawing : Dict Int ( ( Float, Float ), List ( Float, Float ) )
     }
 
 
@@ -42,7 +43,7 @@ type Msg
     | SetNewMazeShape Route.MazeShape
     | SetNewMazeDifficulty Int
     | NextMaze
-    | Draw (List ( Float, Float ))
+    | Draw (List Touch)
     | BackToGenerator
 
 
@@ -53,7 +54,7 @@ init () url key =
       , nextSeed = 0
       , newMazeShape = Route.Hexes
       , newMazeDifficulty = 10
-      , drawing = []
+      , drawing = Dict.empty
       }
     , Time.now
         |> Task.map Time.posixToMillis
@@ -101,7 +102,7 @@ update msg model =
             in
             ( { model
                 | nextSeed = model.nextSeed + 1
-                , drawing = []
+                , drawing = Dict.empty
               }
             , Route.Maze
                 { shape = shape
@@ -113,8 +114,25 @@ update msg model =
                 |> Navigation.pushUrl model.key
             )
 
-        Draw newPoints ->
-            ( { model | drawing = newPoints ++ model.drawing }
+        Draw newTouches ->
+            ( { model
+                | drawing =
+                    List.foldl
+                        (\{ identifier, clientPos } ->
+                            Dict.update
+                                identifier
+                                (\v ->
+                                    case v of
+                                        Just ( first, rest ) ->
+                                            Just ( clientPos, first :: rest )
+
+                                        Nothing ->
+                                            Just ( clientPos, [] )
+                                )
+                        )
+                        model.drawing
+                        newTouches
+              }
             , Cmd.none
             )
 
@@ -256,15 +274,24 @@ controlsBar =
 viewCanvas : Model -> Html Msg
 viewCanvas model =
     model.drawing
+        |> Dict.values
         |> List.map
-            (\( x, y ) ->
-                Svg.circle
-                    [ Attrs.cx (String.fromFloat x)
-                    , Attrs.cy (String.fromFloat y)
-                    , Attrs.r "10"
+            (\( first, rest ) ->
+                let
+                    toCoord ( x, y ) =
+                        String.fromFloat x ++ "," ++ String.fromFloat y
+                in
+                Svg.path
+                    [ Attrs.d
+                        ("M "
+                            ++ toCoord first
+                            ++ String.join " L " (List.map toCoord rest)
+                        )
+                    , Attrs.fill "none"
+                    , Attrs.strokeWidth "5"
                     , Attrs.css
-                        [ Css.fill (Css.hex "76FF03")
-                        , darkMode [ Css.fill (Css.hex "CCFF90") ]
+                        [ Css.property "stroke" "#76FF03"
+                        , darkMode [ Css.property "stroke" "#CCFF90" ]
                         ]
                     ]
                     []
@@ -281,7 +308,6 @@ viewCanvas model =
             , Events.preventDefaultOn "touchmove"
                 (Touch.eventDecoder
                     |> Decode.map .touches
-                    |> Decode.map (List.map .clientPos)
                     |> Decode.map (\touches -> ( Draw touches, True ))
                 )
             ]
