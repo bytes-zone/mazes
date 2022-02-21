@@ -261,7 +261,7 @@ viewCanvas model =
                 Svg.circle
                     [ Attrs.cx (String.fromFloat x)
                     , Attrs.cy (String.fromFloat y)
-                    , Attrs.r "15"
+                    , Attrs.r "10"
                     , Attrs.css
                         [ Css.fill (Css.hex "76FF03")
                         , darkMode [ Css.fill (Css.hex "CCFF90") ]
