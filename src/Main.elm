@@ -291,6 +291,7 @@ viewCanvas model =
                     [ Attrs.d
                         ("M "
                             ++ toCoord first
+                            ++ " L "
                             ++ String.join " L " (List.map toCoord rest)
                         )
                     , Attrs.fill "none"
