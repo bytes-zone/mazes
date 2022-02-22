@@ -33,6 +33,7 @@ type alias Model =
     , newMazeShape : Route.MazeShape
     , newMazeDifficulty : Int
     , drawing : Dict Int ( ( Float, Float ), List ( Float, Float ) )
+    , mouseDraw : Bool
     }
 
 
@@ -46,6 +47,9 @@ type Msg
     | Draw (List Touch)
     | ResetLines
     | BackToGenerator
+    | StartMouseDraw
+    | MouseDraw ( Float, Float )
+    | StopMouseDraw
 
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
@@ -56,6 +60,7 @@ init () url key =
       , newMazeShape = Route.Hexes
       , newMazeDifficulty = 10
       , drawing = Dict.empty
+      , mouseDraw = False
       }
     , Time.now
         |> Task.map Time.posixToMillis
@@ -134,6 +139,38 @@ update msg model =
                         model.drawing
                         newTouches
               }
+            , Cmd.none
+            )
+
+        StartMouseDraw ->
+            ( { model | mouseDraw = True }
+            , Cmd.none
+            )
+
+        MouseDraw coord ->
+            ( if model.mouseDraw then
+                { model
+                    | drawing =
+                        Dict.update
+                            0
+                            (\v ->
+                                case v of
+                                    Just ( first, rest ) ->
+                                        Just ( coord, first :: rest )
+
+                                    Nothing ->
+                                        Just ( coord, [] )
+                            )
+                            model.drawing
+                }
+
+              else
+                model
+            , Cmd.none
+            )
+
+        StopMouseDraw ->
+            ( { model | mouseDraw = False }
             , Cmd.none
             )
 
@@ -316,6 +353,16 @@ viewCanvas model =
                 (Touch.eventDecoder
                     |> Decode.map .touches
                     |> Decode.map (\touches -> ( Draw touches, True ))
+                )
+            , Events.preventDefaultOn "mousedown"
+                (Decode.succeed ( StartMouseDraw, True ))
+            , Events.preventDefaultOn "mouseup"
+                (Decode.succeed ( StopMouseDraw, True ))
+            , Events.preventDefaultOn "mousemove"
+                (Decode.map2 Tuple.pair
+                    (Decode.field "clientX" Decode.float)
+                    (Decode.field "clientY" Decode.float)
+                    |> Decode.map (\coords -> ( MouseDraw coords, True ))
                 )
             ]
 
