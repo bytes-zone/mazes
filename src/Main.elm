@@ -337,17 +337,22 @@ viewMaze maze =
                     ( light, dark ) =
                         case role of
                             Nothing ->
-                                ( Css.hex "ECEFF1", Css.hex "546E7A" )
+                                ( "#ECEFF1", "#546E7A" )
 
                             Just Maze.Entrance ->
-                                ( Css.hex "B2FF59", Css.hex "64DD17" )
+                                ( "#B2FF59", "#64DD17" )
 
                             Just Maze.Exit ->
-                                ( Css.hex "64FFDA", Css.hex "00BFA5" )
+                                ( "#64FFDA", "#00BFA5" )
                 in
-                [ Attrs.css
-                    [ Css.fill light
-                    , darkMode [ Css.fill dark ]
+                [ Attrs.strokeWidth "1"
+                , Attrs.css
+                    [ Css.property "stroke" light
+                    , Css.fill (Css.hex light)
+                    , darkMode
+                        [ Css.property "stroke" dark
+                        , Css.fill (Css.hex dark)
+                        ]
                     ]
                 ]
         , wall =
