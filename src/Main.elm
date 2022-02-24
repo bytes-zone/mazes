@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Browser
+import Browser.Dom as Dom exposing (Viewport)
 import Browser.Navigation as Navigation
 import Css
 import Css.Global as Global
@@ -32,6 +33,7 @@ type alias Model =
     , nextSeed : Int
     , newMazeShape : Route.MazeShape
     , newMazeDifficulty : Int
+    , screenRatio : Float
     , drawing : Dict Int ( ( Float, Float ), List ( Float, Float ) )
     , mouseDraw : Bool
     }
@@ -50,6 +52,7 @@ type Msg
     | StartMouseDraw
     | MouseDraw ( Float, Float )
     | StopMouseDraw
+    | GotViewport Viewport
 
 
 init : Flags -> Url -> Navigation.Key -> ( Model, Cmd Msg )
@@ -59,12 +62,17 @@ init () url key =
       , nextSeed = 0
       , newMazeShape = Route.Hexes
       , newMazeDifficulty = 10
+      , screenRatio = 1024.0 / 768.0
       , drawing = Dict.empty
       , mouseDraw = False
       }
-    , Time.now
-        |> Task.map Time.posixToMillis
-        |> Task.perform SetNextSeed
+    , Cmd.batch
+        [ Time.now
+            |> Task.map Time.posixToMillis
+            |> Task.perform SetNextSeed
+        , Dom.getViewport
+            |> Task.perform GotViewport
+        ]
     )
 
 
@@ -182,6 +190,11 @@ update msg model =
         BackToGenerator ->
             ( model
             , Navigation.pushUrl model.key (Route.toAbsolutePath Route.New)
+            )
+
+        GotViewport { viewport } ->
+            ( { model | screenRatio = viewport.width / viewport.height }
+            , Cmd.none
             )
 
 
@@ -372,7 +385,7 @@ viewCanvas model =
 baseParams : Model -> { width : Int, height : Int, shape : Route.MazeShape }
 baseParams model =
     { shape = model.newMazeShape
-    , width = round (toFloat model.newMazeDifficulty * 1.4)
+    , width = round (toFloat model.newMazeDifficulty * model.screenRatio)
     , height = model.newMazeDifficulty
     }
 
