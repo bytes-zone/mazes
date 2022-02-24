@@ -310,6 +310,8 @@ controlsBar =
                 [ Css.backgroundColor (Css.hex "37474F")
                 , Css.color (Css.hex "ECEFF1")
                 ]
+            , Media.withMedia [ Media.only Media.print [] ]
+                [ Css.display Css.none ]
             ]
         ]
 
