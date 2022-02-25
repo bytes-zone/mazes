@@ -12,6 +12,7 @@ import Html.Events.Extra.Touch as Touch exposing (Touch)
 import Html.Styled as Html exposing (Html)
 import Html.Styled.Attributes as HAttrs exposing (css)
 import Html.Styled.Events as Events
+import Html.Styled.Lazy as Lazy
 import Json.Decode as Decode
 import Maze exposing (Maze)
 import Random
@@ -225,9 +226,7 @@ view model =
                 Route.Maze info ->
                     [ viewMazeControls
                     , viewCanvas model
-                    , baseMaze info
-                        |> Maze.generate (Random.initialSeed info.seed)
-                        |> viewMaze
+                    , Lazy.lazy carveAndView info
                     ]
 
                 Route.NotFound ->
@@ -236,6 +235,13 @@ view model =
         ]
             |> List.map Html.toUnstyled
     }
+
+
+carveAndView : { width : Int, height : Int, shape : Route.MazeShape, seed : Int } -> Html msg
+carveAndView params =
+    baseMaze params
+        |> Maze.generate (Random.initialSeed params.seed)
+        |> viewMaze
 
 
 viewNewFormControls : Model -> Html Msg
