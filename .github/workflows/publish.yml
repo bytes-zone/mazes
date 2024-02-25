@@ -62,7 +62,7 @@ jobs:
       - name: push container
         id: push
         run: |
-          REPO="gcr.io/bytes-zone/mazes"
+          REPO="ghcr.io/bytes-zone/mazes"
           TAG="$(docker images "$REPO" --format "{{.Tag}}")"
 
           FINAL_NAME="$REPO:$TAG"
