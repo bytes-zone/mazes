@@ -36,6 +36,7 @@
             pkgs.elmPackages.elm-format
             pkgs.elmPackages.elm-live
             pkgs.elmPackages.elm-test
+            pkgs.elmPackages.elm-json
           ];
         };
       });
