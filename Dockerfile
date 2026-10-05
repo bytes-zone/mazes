@@ -8,7 +8,7 @@ COPY src /app/src
 WORKDIR /app
 RUN elm make src/Main.elm --output dist/index.html
 
-FROM caddy:2.11.6-alpine
+FROM caddy:2.11.7-alpine
 COPY --from=build /app/dist/index.html /public/index.html
 COPY Caddyfile /srv
 CMD ["caddy", "run"]
